@@ -124,6 +124,10 @@ class Birthday(Field):
         return next_birthday
 
 
+class Address(Field):
+    pass
+
+
 class Record:
     """Represents a contact record."""
 
@@ -131,12 +135,17 @@ class Record:
         self.name = Name(name)
         self.birthday = None
         self.phones = set()
+        self.address = None
 
     def __str__(self):
         name_str = self.name.value
         phones_str = ', '.join(p.value for p in self.phones)
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
-        return f"Contact name: {name_str}, phones: {phones_str}, birthday: {birthday_str}"
+        address = self.address or "N/A"
+        return (f"Contact name: {name_str}, "
+                f"phones: {phones_str}, "
+                f"birthday: {birthday_str}, "
+                f"address: {address}")
 
     def add_phone(self, phone: str) -> None:
         """
@@ -209,6 +218,15 @@ class Record:
             ValueError: If date format is invalid.
         """
         self.birthday = Birthday(birthday)
+
+    def add_address(self, address: str) -> None:
+        """
+        Adds an address to the contact.
+
+        Args:
+            address (str)
+        """
+        self.address = Address(address)
 
 
 class AddressBook(UserDict):
