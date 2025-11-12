@@ -128,7 +128,6 @@ class Email(Field):
     def __init__(self, value):
         emails = ['gmail.com', 'Outlook.com']
         self.splited_post = value.split('@')
-        print(self.splited_post)
         if not self.splited_post[1] in emails:
             raise ValidationError('Post is wrong.')
         super().__init__(value)
