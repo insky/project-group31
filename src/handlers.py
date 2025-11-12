@@ -129,9 +129,7 @@ def handle_add(book: AddressBook, name: str, phone: str, email: str='No email'):
         message = "Contact added"
 
     record.add_phone(phone)
-    #Added
     record.add_email(email)
-    #---
     return message
 
 
