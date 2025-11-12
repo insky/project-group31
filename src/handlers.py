@@ -108,7 +108,7 @@ def handle_help(_: AddressBook):
 
 
 @input_error
-def handle_add(book: AddressBook, name: str, phone: str, email: str='No email'):
+def handle_add(book: AddressBook, name: str, phone: str, email: str):
     """
     Adds a new contact or update existing contact's phone number.
 
