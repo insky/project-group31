@@ -126,10 +126,15 @@ class Birthday(Field):
 
 class Email(Field):
     def __init__(self, value):
-        emails = ['gmail.com', 'Outlook.com']
-        self.splited_post = value.split('@')
-        if not self.splited_post[1] in emails:
-            raise ValidationError('Post is wrong.')
+        self.splited_post = re.findall(r'(\w*)@(\w*).(\w*)', value)
+        for i in self.splited_post:
+            for line in i:
+                if any(cc.isdigit() for cc in line):
+                    raise ValidationError('email can"t contain any digits.')
+                if line == '':
+                    raise ValidationError('Post is wrong.')
+                else:
+                    pass
         super().__init__(value)
 
 class Record:
