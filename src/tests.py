@@ -182,7 +182,7 @@ class TestFieldClasses(TestCaseWithMockDatetime):
         self.assertEqual(next_date, expected)
 
     def test_address_valid(self):
-        """Test Name field with valid input."""
+        """Test Address field with valid input."""
         address = Address("Silly Address")
         self.assertEqual(address.value, "Silly Address")
 
