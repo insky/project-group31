@@ -124,7 +124,6 @@ class Birthday(Field):
 
         return next_birthday
 
-#Added
 class Email(Field):
     def __init__(self, value):
         emails = ['gmail.com', 'Outlook.com']
@@ -133,7 +132,7 @@ class Email(Field):
         if not self.splited_post[1] in emails:
             raise ValidationError('Post is wrong.')
         super().__init__(value)
-#---
+
 class Record:
     """Represents a contact record."""
 
@@ -141,20 +140,15 @@ class Record:
         self.name = Name(name)
         self.birthday = None
         self.phones = set()
-        #Added
         self.email = None
-        #---
 
     def __str__(self):
         name_str = self.name.value
         phones_str = ', '.join(p.value for p in self.phones)
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
-        #Added
         email_str = self.email.value if self.email else 'No email'
-        #---
         return f"Contact name: {name_str}, phones: {phones_str}, birthday: {birthday_str}, email: {email_str}"
     
-    #Added
     def add_email(self, email:str) -> None:
         self.email = Email(email)
 
@@ -164,7 +158,6 @@ class Record:
     def change_email(self, new_email) -> None:
         self.email= Email(new_email)
 
-    #---
     def add_phone(self, phone: str) -> None:
         """
         Adds a phone number to the contact.
