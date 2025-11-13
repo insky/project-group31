@@ -2,6 +2,7 @@
 
 from handlers import commands, parse_input, handle_exit
 from address_book import AddressBook
+from intelligent_command import suggest_command  # New import
 
 def main():
     """Main function to run the assistant bot."""
@@ -14,8 +15,9 @@ def main():
         except (KeyboardInterrupt, EOFError):
             print()  # For a Ctrl+C newline on exit
             handle_exit(book)
+            continue # Just for linters, won't be reached
 
-        command, args = parse_input(user_input) # type: ignore
+        command, args = parse_input(user_input)
 
         if command is None:
             print("- No command entered.")
@@ -23,7 +25,12 @@ def main():
 
         func = commands.get(command)
         if func is None:
-            print("- Invalid command.")
+            suggestion = suggest_command(user_input)
+            if suggestion:
+                print(f'- Did you mean "{suggestion} {''.join(args)}"?')
+
+            else:
+                print("- Invalid command.")
             continue
 
         print('-', func(book, *args))
