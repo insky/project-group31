@@ -186,7 +186,8 @@ def handle_all(book: AddressBook):
     for record in book.data.values():
         phones = ', '.join(phone.value for phone in record.phones)
         birthday = record.birthday if record.birthday else 'N/A'
-        result.append(f"name: {record.name}; phones: {phones}; birthday: {birthday}")
+        address = record.address if record.address else 'N/A'
+        result.append(f"name: {record.name}; phones: {phones}; birthday: {birthday}, address: {address}")
     return "\n- ".join(result)
 
 
