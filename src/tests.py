@@ -14,7 +14,7 @@ import tempfile
 import os
 from address_book import (
     Field, Name, Phone, Birthday, Record, AddressBook,
-    ValidationError
+    ValidationError, Address
 )
 from handlers import (
     parse_input, handle_hello, handle_exit, handle_help,
@@ -181,6 +181,11 @@ class TestFieldClasses(TestCaseWithMockDatetime):
         expected = date(2025, 2, 28)  # Friday 28 Feb in non-leap year
         self.assertEqual(next_date, expected)
 
+    def test_address_valid(self):
+        """Test Address field with valid input."""
+        address = Address("Silly Address")
+        self.assertEqual(address.value, "Silly Address")
+
 
 class TestRecord(TestCaseWithMockDatetime):
     """Test cases for Record class."""
@@ -197,16 +202,18 @@ class TestRecord(TestCaseWithMockDatetime):
         record = Record("John")
         record.add_phone("1234567890")
         record.add_birthday("15.08.1990")
+        record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: 15.08.1990"
+        expected = "Contact name: John, phones: 1234567890, birthday: 15.08.1990, address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_record_str_no_birthday(self):
         """Test Record string representation without birthday."""
         record = Record("John")
         record.add_phone("1234567890")
+        record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: N/A"
+        expected = "Contact name: John, phones: 1234567890, birthday: N/A, address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_add_phone_valid(self):

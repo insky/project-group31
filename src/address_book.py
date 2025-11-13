@@ -4,8 +4,13 @@ import pickle
 from collections import UserDict
 from datetime import datetime, timedelta, date
 import re
+from pathlib import Path
+from typing import Union
 
-ADDRESS_BOOK_FILE = 'address_book.pkl'
+DATA_DIR = Path.home() / "addressbook_data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+FILE_PATH = DATA_DIR / "addressbook.pkl"
 
 class ValidationError(Exception):
     """Custom exception for validation errors."""
@@ -128,14 +133,17 @@ class Email(Field):
     def __init__(self, value):
         valid = self.email_validation(value)
         if not valid:
-            raise ValidationError('Post is wrong.')
-        else:
-            pass
+            raise ValidationError('Invalid Email')
         super().__init__(value)
+
     def email_validation(self, email):
-        patt = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
         return re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', email) is not None
         
+
+class Address(Field):
+    pass
+
+
 class Record:
     """Represents a contact record."""
 
@@ -144,6 +152,7 @@ class Record:
         self.birthday = None
         self.phones = set()
         self.email = None
+        self.address = None
 
     def __str__(self):
         name_str = self.name.value
@@ -160,6 +169,11 @@ class Record:
     
     def change_email(self, new_email) -> None:
         self.email= Email(new_email)
+        address = self.address or "N/A"
+        return (f"Contact name: {name_str}, "
+                f"phones: {phones_str}, "
+                f"birthday: {birthday_str}, "
+                f"address: {address}")
 
     def add_phone(self, phone: str) -> None:
         """
@@ -233,12 +247,21 @@ class Record:
         """
         self.birthday = Birthday(birthday)
 
+    def add_address(self, address: str) -> None:
+        """
+        Adds an address to the contact.
+
+        Args:
+            address (str)
+        """
+        self.address = Address(address)
+
 
 class AddressBook(UserDict):
     """Represents the address book."""
 
     @staticmethod
-    def load(filename: str = ADDRESS_BOOK_FILE) -> 'AddressBook':
+    def load(filename: Union[Path, str] = FILE_PATH) -> 'AddressBook':
         """
         Loads the address book from a file.
 
@@ -253,7 +276,7 @@ class AddressBook(UserDict):
         except (FileNotFoundError, EOFError):
             return AddressBook()
 
-    def save(self, filename: str = ADDRESS_BOOK_FILE) -> None:
+    def save(self, filename: Union[Path, str] = FILE_PATH) -> None:
         """
         Saves the address book to a file.
 
