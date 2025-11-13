@@ -126,17 +126,16 @@ class Birthday(Field):
 
 class Email(Field):
     def __init__(self, value):
-        self.splited_post = re.findall(r'(\w*)@(\w*).(\w*)', value)
-        for i in self.splited_post:
-            for line in i:
-                if any(cc.isdigit() for cc in line):
-                    raise ValidationError('email can"t contain any digits.')
-                if line == '':
-                    raise ValidationError('Post is wrong.')
-                else:
-                    pass
+        valid = self.email_validation(value)
+        if not valid:
+            raise ValidationError('Post is wrong.')
+        else:
+            pass
         super().__init__(value)
-
+    def email_validation(self, email):
+        patt = r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'
+        return re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', email) is not None
+        
 class Record:
     """Represents a contact record."""
 
