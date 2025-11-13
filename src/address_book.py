@@ -129,19 +129,30 @@ class Birthday(Field):
 
         return next_birthday
 
+
 class Email(Field):
+    """Represents a contact's email address."""
     def __init__(self, value):
         valid = self.email_validation(value)
         if not valid:
             raise ValidationError('Invalid Email')
         super().__init__(value)
 
-    def email_validation(self, email):
+    def email_validation(self, email: str) -> bool:
+        """
+        Validates the email format.
+
+        Args:
+            email (str): The email address to validate.
+
+        Returns:
+            bool: True if email is valid, False otherwise.
+        """
         return re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', email) is not None
-        
+
 
 class Address(Field):
-    pass
+    """Represents a contact's address."""
 
 
 class Record:
@@ -158,22 +169,43 @@ class Record:
         name_str = self.name.value
         phones_str = ', '.join(p.value for p in self.phones)
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
-        email_str = self.email.value if self.email else 'No email'
-        return f"Contact name: {name_str}, phones: {phones_str}, birthday: {birthday_str}, email: {email_str}"
-    
+        email_str = self.email.value if self.email else 'N/A'
+        address_str = self.address.value if self.address else 'N/A'
+        return (
+            f"Contact name: {name_str}, phones: {phones_str}, "
+            f"birthday: {birthday_str}, email: {email_str}, "
+            f"address: {address_str}"
+        )
+
     def add_email(self, email:str) -> None:
+        """
+        Adds an email to the contact.
+
+        Args:
+            email (str): The email address to add.
+
+        Raises:
+            ValidationError: If email is invalid.
+        """
         self.email = Email(email)
 
     def remove_email(self) -> None:
+        """
+        Removes the email from the contact.
+        """
         self.email = None
-    
+
     def change_email(self, new_email) -> None:
-        self.email= Email(new_email)
-        address = self.address or "N/A"
-        return (f"Contact name: {name_str}, "
-                f"phones: {phones_str}, "
-                f"birthday: {birthday_str}, "
-                f"address: {address}")
+        """
+        Changes the email of the contact.
+
+        Args:
+            new_email (str): The new email address.
+
+        Raises:
+            ValidationError: If email is invalid.
+        """
+        self.email = Email(new_email)
 
     def add_phone(self, phone: str) -> None:
         """
