@@ -108,7 +108,7 @@ def handle_help(_: AddressBook):
 
 
 @input_error
-def handle_add(book: AddressBook, name: str, phone: str):
+def handle_add(book: AddressBook, name: str, phone: str, email: str):
     """
     Adds a new contact or update existing contact's phone number.
 
@@ -129,7 +129,7 @@ def handle_add(book: AddressBook, name: str, phone: str):
         message = "Contact added"
 
     record.add_phone(phone)
-
+    record.add_email(email)
     return message
 
 
@@ -186,8 +186,9 @@ def handle_all(book: AddressBook):
     for record in book.data.values():
         phones = ', '.join(phone.value for phone in record.phones)
         birthday = record.birthday if record.birthday else 'N/A'
+        email = record.email
         address = record.address if record.address else 'N/A'
-        result.append(f"name: {record.name}; phones: {phones}; birthday: {birthday}, address: {address}")
+        result.append(f"name: {record.name}; phones: {phones}; birthday: {birthday}, email: {email}, address: {address}")
     return "\n- ".join(result)
 
 
@@ -262,3 +263,4 @@ commands: dict = {
     'show-birthday': handle_show_birthday,
     'birthdays': handle_upcoming_birthdays
 }
+

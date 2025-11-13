@@ -3,6 +3,7 @@
 import pickle
 from collections import UserDict
 from datetime import datetime, timedelta, date
+import re
 from pathlib import Path
 from typing import Union
 
@@ -128,6 +129,16 @@ class Birthday(Field):
 
         return next_birthday
 
+class Email(Field):
+    def __init__(self, value):
+        valid = self.email_validation(value)
+        if not valid:
+            raise ValidationError('Invalid Email')
+        super().__init__(value)
+
+    def email_validation(self, email):
+        return re.match(r'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$', email) is not None
+        
 
 class Address(Field):
     pass
@@ -140,12 +151,24 @@ class Record:
         self.name = Name(name)
         self.birthday = None
         self.phones = set()
+        self.email = None
         self.address = None
 
     def __str__(self):
         name_str = self.name.value
         phones_str = ', '.join(p.value for p in self.phones)
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
+        email_str = self.email.value if self.email else 'No email'
+        return f"Contact name: {name_str}, phones: {phones_str}, birthday: {birthday_str}, email: {email_str}"
+    
+    def add_email(self, email:str) -> None:
+        self.email = Email(email)
+
+    def remove_email(self) -> None:
+        self.email = None
+    
+    def change_email(self, new_email) -> None:
+        self.email= Email(new_email)
         address = self.address or "N/A"
         return (f"Contact name: {name_str}, "
                 f"phones: {phones_str}, "
