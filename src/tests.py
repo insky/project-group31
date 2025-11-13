@@ -204,7 +204,7 @@ class TestRecord(TestCaseWithMockDatetime):
         record.add_birthday("15.08.1990")
         record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: 15.08.1990, address: Silly"
+        expected = "Contact name: John, phones: 1234567890, birthday: 15.08.1990, email: N/A, address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_record_str_no_birthday(self):
@@ -213,7 +213,7 @@ class TestRecord(TestCaseWithMockDatetime):
         record.add_phone("1234567890")
         record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: N/A, address: Silly"
+        expected = "Contact name: John, phones: 1234567890, birthday: N/A, email: N/A, address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_add_phone_valid(self):
@@ -506,19 +506,19 @@ class TestHandlers(TestCaseWithMockDatetime):
 
     def test_handle_add_new_contact(self):
         """Test adding new contact."""
-        result = handle_add(self.book, "Jane", "0987654321")
+        result = handle_add(self.book, "Jane", "0987654321", "jane@example.com")
         self.assertEqual(result, "Contact added")
         self.assertIn("Jane", self.book.data)
 
     def test_handle_add_existing_contact(self):
         """Test adding phone to existing contact."""
-        result = handle_add(self.book, "John", "0987654321")
+        result = handle_add(self.book, "John", "0987654321", "john@example.com")
         self.assertEqual(result, "Contact updated")
         self.assertEqual(len(self.book.data["John"].phones), 2)
 
     def test_handle_add_invalid_phone(self):
         """Test adding contact with invalid phone."""
-        result = handle_add(self.book, "Jones", "invalid")
+        result = handle_add(self.book, "Jones", "invalid", "jones@example.com")
         self.assertEqual(result, "Invalid phone number")
 
     def test_handle_change_valid(self):
