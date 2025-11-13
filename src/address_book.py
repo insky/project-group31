@@ -3,8 +3,13 @@
 import pickle
 from collections import UserDict
 from datetime import datetime, timedelta, date
+from pathlib import Path
+from typing import Union
 
-ADDRESS_BOOK_FILE = 'address_book.pkl'
+DATA_DIR = Path.home() / "addressbook_data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+FILE_PATH = DATA_DIR / "addressbook.pkl"
 
 class ValidationError(Exception):
     """Custom exception for validation errors."""
@@ -233,7 +238,7 @@ class AddressBook(UserDict):
     """Represents the address book."""
 
     @staticmethod
-    def load(filename: str = ADDRESS_BOOK_FILE) -> 'AddressBook':
+    def load(filename: Union[Path, str] = FILE_PATH) -> 'AddressBook':
         """
         Loads the address book from a file.
 
@@ -248,7 +253,7 @@ class AddressBook(UserDict):
         except (FileNotFoundError, EOFError):
             return AddressBook()
 
-    def save(self, filename: str = ADDRESS_BOOK_FILE) -> None:
+    def save(self, filename: Union[Path, str] = FILE_PATH) -> None:
         """
         Saves the address book to a file.
 
