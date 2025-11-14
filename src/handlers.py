@@ -113,7 +113,7 @@ def handle_help(_: AddressBook):
 
 
 @input_error
-def handle_add(book: AddressBook, name: str, phone: str, email: str=None):
+def handle_add(book: AddressBook, name: str, phone: str, email: str | None = None):
     """
     Adds a new contact or update existing contact's phone number.
 
@@ -191,7 +191,17 @@ def handle_all(book: AddressBook):
     return str(book)
 
 @input_error
-def handle_search(book: AddressBook, query: str):
+def handle_search(book: AddressBook, query: str) -> str:
+    """
+    Searches for contacts matching the query.
+
+    Args:
+        book (AddressBook): The address book.
+        query (str): The search query.
+
+    Returns:
+        str: The search results or message if none.
+    """
     records = book.search(query)
 
     output = []
@@ -216,10 +226,14 @@ def handle_add_birthday(book: AddressBook, name: str, birthday: str):
         str: The result message.
     """
     record = book.find(name)
-    if not record.birthday:
-        record.add_birthday(birthday)  # type: ignore
-        return "Birthday added"
-    return 'Birthday is present'
+    if record is None:
+        return "Contact not found"
+
+    if record.birthday:
+        return "Birthday already set"
+
+    record.add_birthday(birthday)
+    return "Birthday added"
 
 
 @input_error
@@ -235,7 +249,10 @@ def handle_show_birthday(book: AddressBook, name: str):
         str: The birthday or error message.
     """
     record = book.find(name)
-    if record.birthday is None:  # type: ignore
+    if record is None:
+        return "Contact not found"
+
+    if record.birthday is None:
         return "Birthday not set"
 
     return f"{name}'s birthday is {record.birthday}."  # type: ignore
@@ -263,16 +280,74 @@ def handle_upcoming_birthdays(book: AddressBook):
 
 @input_error
 def handle_update_birthday(book: AddressBook, name: str, birthday: str):
+    """
+    Updates the birthday for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        birthday (str): The new birthday in DD.MM.YYYY format.
+
+    Returns:
+        str: The result message.
+    """
     record = book.find(name)
-    return record.change_birthday(birthday)
+    if record:
+        record.add_birthday(birthday)
+        return 'Birthday updated'
+    return 'Contact not found'
 
 @input_error
-def handle_update(book: AddressBook, name: str, email: str, address: str):
-    return book.update(name, email, address)
+def handle_update_email(book: AddressBook, name: str, email: str):
+    """
+    Updates the email for a contact.
 
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        email (str): The new email address.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        record.add_email(email)
+        return 'Email updated'
+    return 'Contact not found'
+
+
+@input_error
+def handle_update_address(book: AddressBook, name: str, address: str):
+    """
+    Updates the address for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        address (str): The new address.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        record.add_address(address)
+        return 'Address updated'
+    return 'Contact not found'
 
 @input_error
 def handle_delete(book: AddressBook, name: str):
+    """
+    Deletes a contact by name.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+
+    Returns:
+        str: The result message.
+    """
     record = book.find(name)
     if record:
         book.delete(name)
@@ -294,7 +369,7 @@ commands: dict = {
     'update-birthday': handle_update_birthday,
     'birthdays': handle_upcoming_birthdays,
     'search-contact': handle_search,
-    'delete-contact': handle_delete, 
-    'update-contact': handle_update
+    'delete-contact': handle_delete,
+    'update-email': handle_update_email,
+    'update-address': handle_update_address
 }
-
