@@ -19,7 +19,8 @@ from address_book import (
 from handlers import (
     parse_input, handle_hello, handle_exit, handle_help,
     handle_add, handle_change, handle_phone, handle_all,
-    handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays
+    handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays, handle_add_note, handle_all_notes,
+    handle_find_note_by_tag, handle_sort_notes_by_tags
 )
 from note_book import NotesBook, Note
 from storage import save, load
@@ -688,6 +689,69 @@ class TestHandlers(TestCaseWithMockDatetime):
         self.book.data["John"].add_birthday("8.11.2000")
         result = handle_upcoming_birthdays(self.book)
         self.assertEqual(result, "John: 10.11.2025")
+
+    def test_handle_add_note_with_tags(self):
+        """Test add-note handler with tags."""
+        result = handle_add_note(
+            self.notes,
+            "Prepare for blackouts",
+            "--tags",
+            "#home",
+            "#urgent",
+        )
+
+        self.assertIn("Note added with id", result)
+        self.assertIn("Prepare for blackouts", result)
+        self.assertIn("home", result)
+        self.assertIn("urgent", result)
+
+
+    def test_handle_add_note_without_tags(self):
+        """Test add-note handler without tags."""
+        result = handle_add_note(self.notes, "Yoga session")
+
+        self.assertIn("Note added with id", result)
+        self.assertIn("Yoga session", result)
+
+    def test_handle_all_notes_no_notes(self):
+        """Test all-notes handler when there are no notes."""
+        result = handle_all_notes(self.notes)
+        self.assertEqual(result, "No notes found.")
+
+    def test_handle_all_notes_lists_existing_notes(self):
+        """Test all-notes handler lists all existing notes."""
+        handle_add_note(self.notes, "Prepare for blackouts", "--tags", "#home", "#urgent")
+        handle_add_note(self.notes, "Yoga", "--tags", "self-care")
+
+        result = handle_all_notes(self.notes)
+
+        self.assertIn("Prepare for blackouts", result)
+        self.assertIn("Yoga", result)
+        self.assertIn("home", result)
+        self.assertIn("urgent", result)
+        self.assertIn("self-care", result)
+
+    def test_add_note_with_tag_alias_and_find(self):
+        """Test that add-note works with --tag alias and find-note-tag finds it."""
+        handle_add_note(self.notes,
+                        "Test note",
+                        "--tags",
+                        "#home")
+
+        result = handle_find_note_by_tag(self.notes, "home")
+
+        self.assertIn("Test note", result)
+        self.assertIn("home", result)
+
+    def test_handle_sort_notes_by_tags(self):
+        """Test sorting notes by tags."""
+        handle_add_note(self.notes, "Yoga", "--tags", "self-care")
+        handle_add_note(self.notes, "Prepare", "--tags", "#home", "#urgent")
+        result = handle_sort_notes_by_tags(self.notes)
+        lines = result.split("\n")
+
+        self.assertIn("Prepare", lines[0])
+        self.assertIn("Yoga", lines[1])
 
 if __name__ == '__main__':
     unittest.main()
