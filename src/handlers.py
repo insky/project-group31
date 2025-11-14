@@ -2,6 +2,7 @@
 
 import sys
 from address_book import AddressBook, Record, ValidationError
+from storage import save
 
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
@@ -78,7 +79,7 @@ def handle_exit(book: AddressBook):
     """
     print("- Goodbye!")
     print()  # For a newline on exit
-    book.save()
+    save(book, "addressbook.pkl")
     sys.exit(0)
 
 

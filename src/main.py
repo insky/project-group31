@@ -3,10 +3,12 @@
 from handlers import commands, parse_input, handle_exit
 from address_book import AddressBook
 from intelligent_command import suggest_command  # New import
+from storage import load
+
 
 def main():
     """Main function to run the assistant bot."""
-    book = AddressBook.load()
+    book = load("addressbook.pkl", default_factory=AddressBook)
 
     print("Welcome to the assistant bot!")
     while True:
