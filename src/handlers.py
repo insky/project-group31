@@ -1,0 +1,430 @@
+"""Handlers for user commands."""
+import shlex
+import sys
+from address_book import AddressBook, Record, ValidationError
+from note_book import NotesBook, Note
+from storage import save
+import rich
+
+def parse_input(user_input: str) -> tuple[str | None, list[str]]:
+    """
+    Parses user input into command and arguments.
+
+    Args:
+        user_input (str): The user input string.
+
+    Returns:
+        tuple[str | None, list[str]]: A tuple containing the command and arguments.
+    """
+    parts = shlex.split(user_input)
+    if not parts:
+        return None, []
+
+    cmd, *args = parts
+    return cmd.lower(), args
+
+
+def input_error(func):
+    """
+    Decorator for handling input errors.
+
+    Args:
+        func: The function to wrap.
+
+    Returns:
+        The wrapped function.
+
+    Raises:
+        TypeError: If invalid number of parameters.
+        KeyError: If contact not found.
+        ValueError: If invalid input.
+        ValidationError: If validation fails.
+    """
+
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except TypeError:
+            return "Invalid number of parameters"
+        except KeyError:
+            return "Contact not found"
+        except ValueError:
+            return "Invalid input. Please enter the correct data"
+        except AttributeError:
+            return "Contact not found"
+        except ValidationError as ve:
+            return str(ve)
+
+    return wrapper
+
+
+@input_error
+def handle_hello(_: AddressBook):
+    """
+    Greets the user.
+
+    Args:
+        _: The address book (unused).
+
+    Returns:
+        str: The greeting message.
+    """
+    return "rich.print(Panel.fit('[bold white]How can I help you?[/] :smiley:'))"
+
+
+@input_error
+def handle_exit(book: AddressBook, notes: NotesBook):
+    """
+    Exits the program.
+
+    Args:
+        book (AddressBook): The address book.
+        notes (NotesBook): The notes book
+    """
+    rich.print("[bold white]- Goodbye![bold white] :sunrise_over_mountains:")
+    print()  # For a newline on exit
+    save(book, "addressbook.pkl")
+    save(notes, "notes.pkl")
+    sys.exit(0)
+
+
+@input_error
+def handle_help(_: AddressBook):
+    """
+    Returns help text with available commands.
+
+    Args:
+        _: The address book (unused).
+
+    Returns:
+        str: The help text.
+    """
+    help_text = """Available commands:
+    hello - Greet the bot
+    help - Show this help message
+    exit | close - Exit the bot
+    add <name> <phone> - Add a new contact
+    change <name> <old_phone> <new_phone> - Change the phone number of a contact
+    phone <name> - Get the phone number of a contact
+    all - List all contacts
+    add-birthday <name> <birthday> - Add a birthday for a contact
+    show-birthday <name> - Show the birthday of a contact
+    update-birthday <name> <birthday> - Updates birthday for a contact
+    birthdays - Show upcoming birthdays in the next week
+    search-contact <query> - Show records that match query by either name, phone, email, or address
+    delete-contact <name> - Delete contact by name
+    update-email <name> <email>
+    update-address <name> <address>"""
+
+    rich.print(f'[bold white]{help_text}[/]')
+
+
+@input_error
+def handle_add(book: AddressBook, name: str, phone: str, email: str | None = None):
+    """
+    Adds a new contact or update existing contact's phone number.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        phone (str): The phone number.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    message = "rich.print('[bold white]Contact updated[/] :grin:')"
+
+    if record is None:
+        record = Record(name)
+        book.add_record(record)
+        message = "rich.print('[bold white]Contact added[/] :grin:')"
+
+    record.add_phone(phone)
+    if email:
+        record.add_email(email)
+    return message
+
+
+@input_error
+def handle_change(book: AddressBook, name: str, old_phone: str, new_phone: str):
+    """
+    Changes an existing contact's phone number.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        old_phone (str): The old phone number.
+        new_phone (str): The new phone number.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    record.edit_phone(old_phone, new_phone)  # type: ignore
+    return "rich.print('[bold white]Contact updated[/] :grin:')"
+
+
+@input_error
+def handle_phone(book: AddressBook, name: str):
+    """
+    Gets the phone number of a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+
+    Returns:
+        str: The phone numbers or error message.
+    """
+    record = book.find(name)
+    return f"rich.print('[bold white]{name}: {', '.join(phone.value for phone in record.phones)}[/]')"  # type: ignore
+
+
+@input_error
+def handle_all(book: AddressBook):
+    """
+    Lists all contacts.
+
+    Args:
+        book (AddressBook): The address book.
+
+    Returns:
+        str: The list of contacts or message if none.
+    """
+    if not book.data:
+        return "No contacts found"
+
+    rich.print(f'[bold white]{str(book)}[/]')
+
+
+@input_error
+def handle_search(book: AddressBook, query: str) -> str:
+    """
+    Searches for contacts matching the query.
+
+    Args:
+        book (AddressBook): The address book.
+        query (str): The search query.
+
+    Returns:
+        str: The search results or message if none.
+    """
+    records = book.search(query)
+
+    output = []
+    if records:
+        for record in records:
+            output.append(str(record))
+        to_out = '\n- '.join(output)
+        rich.print(f"[bold white]'{to_out}[/]")
+    rich.print(f'[bold white]No contact found for "{query}"[/]')
+
+
+@input_error
+def handle_add_birthday(book: AddressBook, name: str, birthday: str):
+    """
+    Adds a birthday for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        birthday (str): The birthday in DD.MM.YYYY format.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record is None:
+        return "rich.print('[bold white]Contact not found[/] :thinking_face:')"
+
+    if record.birthday:
+        return "rich.print('[bold white]Birthday already set[/] :smiley:')"
+
+    record.add_birthday(birthday)
+    return "rich.print('[bold white]Birthday added[/] :smiley:')"
+
+
+@input_error
+def handle_show_birthday(book: AddressBook, name: str):
+    """
+    Shows the birthday of a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+
+    Returns:
+        str: The birthday or error message.
+    """
+    record = book.find(name)
+    if record is None:
+        return "rich.print('[bold white]Contact not found[/] :worried:')"
+
+    if record.birthday is None:
+        return "rich.print('[bold white]Birthday not set[/] :worried:')"
+
+    rich.print(f"[bold white]{name}'s birthday is {record.birthday}.[/]")  # type: ignore
+
+
+@input_error
+def handle_upcoming_birthdays(book: AddressBook):
+    """
+    Shows contacts with upcoming birthdays.
+
+    Args:
+        book (AddressBook): The address book.
+
+    Returns:
+        str: The list of upcoming birthdays or message if none.
+    """
+    upcoming = book.get_upcoming_birthdays()
+    if not upcoming:
+        return "No upcoming birthdays"
+
+    result = []
+    for item in upcoming:
+        result.append(f"{item['name']}: {item['congratulation_day'].strftime('%d.%m.%Y')}")
+    print("\n".join(result))
+
+
+@input_error
+def handle_update_birthday(book: AddressBook, name: str, birthday: str):
+    """
+    Updates the birthday for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        birthday (str): The new birthday in DD.MM.YYYY format.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        record.add_birthday(birthday)
+        return "rich.print('[bold white]Birthday updated[/]')"
+    return "rich.print('[bold white]Contact not found[/]')"
+
+
+@input_error
+def handle_update_email(book: AddressBook, name: str, email: str):
+    """
+    Updates the email for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        email (str): The new email address.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        record.add_email(email)
+        return "rich.print('[bold white]Email updated[bold white] :smiley:')"
+    return "rich.print('[bold white]Contact not found[/] :worried:')"
+
+
+@input_error
+def handle_update_address(book: AddressBook, name: str, address: str):
+    """
+    Updates the address for a contact.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+        address (str): The new address.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        record.add_address(address)
+        return "rich.print('[bold white]Address updated[/] :smiley:')"
+    return "rich.print('[bold white]Contact not found[/] :worried:)"
+
+
+@input_error
+def handle_delete(book: AddressBook, name: str):
+    """
+    Deletes a contact by name.
+
+    Args:
+        book (AddressBook): The address book.
+        name (str): The contact name.
+
+    Returns:
+        str: The result message.
+    """
+    record = book.find(name)
+    if record:
+        book.delete(name)
+        return "rich.print('[bold white]Contact deleted[/]')"
+    return "rich.print('[bold white]Contact not found[/]')"
+
+@input_error
+def handle_add_note(notes: NotesBook, *args: str) -> str:
+    """
+    add-note <text> [--tags tag1 tag2 ...]
+    """
+    if not args:
+        return "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"
+
+    if "--tags" in args:
+        tag_index = args.index("--tags")
+
+        text_parts = args[:tag_index]
+        tag_parts = args[tag_index + 1:]
+    else:
+        text_parts = args
+        tag_parts = []
+
+    text = " ".join(text_parts).strip()
+    if not text:
+        return "Note text cannot be empty."
+
+    tags = set()
+    for raw_tag in tag_parts:
+        cleaned = raw_tag.lstrip("#").strip().lower()
+        if cleaned:
+            tags.add(cleaned)
+
+    note = Note(text)
+    if tags:
+        note.add_tags(tags)
+
+    notes.add_note(note)
+
+    tags_str = f" tags={sorted(tags)}" if tags else ""
+    return 'rich.print(f"[bold white]Note added with id {note.id}.{tags_str}. {note.text}[/]")'
+
+
+commands: dict = {
+    'close': handle_exit,
+    'exit': handle_exit,
+}
+
+book_commands: dict = {
+    'hello': handle_hello,
+    'help': handle_help,
+    'add': handle_add,
+    'change': handle_change,
+    'phone': handle_phone,
+    'all': handle_all,
+    'add-birthday': handle_add_birthday,
+    'show-birthday': handle_show_birthday,
+    'update-birthday': handle_update_birthday,
+    'birthdays': handle_upcoming_birthdays,
+    'search-contact': handle_search,
+    'delete-contact': handle_delete,
+    'update-email': handle_update_email,
+    'update-address': handle_update_address,
+}
+
+note_commands = {
+    'add-note': handle_add_note,
+}
