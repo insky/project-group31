@@ -38,9 +38,9 @@ def input_error(func):
         ValueError: If invalid input.
         ValidationError: If validation fails.
     """
-    def wrapper(*args):
+    def wrapper(*args, **kwargs):
         try:
-            return func(*args)
+            return func(*args, **kwargs)
         except TypeError:
             return "Invalid number of parameters"
         except KeyError:
@@ -103,12 +103,17 @@ def handle_help(_: AddressBook):
     all - List all contacts
     add-birthday <name> <birthday> - Add a birthday for a contact
     show-birthday <name> - Show the birthday of a contact
-    birthdays - Show upcoming birthdays in the next week"""
+    update-birthday <name> <birthday> - Updates birthday for a contact
+    birthdays - Show upcoming birthdays in the next week
+    search-contact <query> - Show records that match query by either name, phone, email, or address
+    delete-contact <name> - Delete contact by name
+    update-contact <name> <email> <address>"""
+
     return help_text
 
 
 @input_error
-def handle_add(book: AddressBook, name: str, phone: str, email: str):
+def handle_add(book: AddressBook, name: str, phone: str, email: str=None):
     """
     Adds a new contact or update existing contact's phone number.
 
@@ -129,7 +134,8 @@ def handle_add(book: AddressBook, name: str, phone: str, email: str):
         message = "Contact added"
 
     record.add_phone(phone)
-    record.add_email(email)
+    if email:
+        record.add_email(email)
     return message
 
 
@@ -182,14 +188,18 @@ def handle_all(book: AddressBook):
     if not book.data:
         return "No contacts found"
 
-    result = []
-    for record in book.data.values():
-        phones = ', '.join(phone.value for phone in record.phones)
-        birthday = record.birthday if record.birthday else 'N/A'
-        email = record.email
-        address = record.address if record.address else 'N/A'
-        result.append(f"name: {record.name}; phones: {phones}; birthday: {birthday}, email: {email}, address: {address}")
-    return "\n- ".join(result)
+    return str(book)
+
+@input_error
+def handle_search(book: AddressBook, query: str):
+    records = book.search(query)
+
+    output = []
+    if records:
+        for record in records:
+            output.append(str(record))
+        return '\n- '.join(output)
+    return f'No contact found for "{query}"'
 
 
 @input_error
@@ -206,8 +216,10 @@ def handle_add_birthday(book: AddressBook, name: str, birthday: str):
         str: The result message.
     """
     record = book.find(name)
-    record.add_birthday(birthday)  # type: ignore
-    return "Birthday added"
+    if not record.birthday:
+        record.add_birthday(birthday)  # type: ignore
+        return "Birthday added"
+    return 'Birthday is present'
 
 
 @input_error
@@ -249,6 +261,24 @@ def handle_upcoming_birthdays(book: AddressBook):
         result.append(f"{item['name']}: {item['congratulation_day'].strftime('%d.%m.%Y')}")
     return "\n".join(result)
 
+@input_error
+def handle_update_birthday(book: AddressBook, name: str, birthday: str):
+    record = book.find(name)
+    return record.change_birthday(birthday)
+
+@input_error
+def handle_update(book: AddressBook, name: str, email: str, address: str):
+    return book.update(name, email, address)
+
+
+@input_error
+def handle_delete(book: AddressBook, name: str):
+    record = book.find(name)
+    if record:
+        book.delete(name)
+        return 'Contact deleted'
+    return 'Contact not found'
+
 
 commands: dict = {
     'hello': handle_hello,
@@ -261,6 +291,10 @@ commands: dict = {
     'all': handle_all,
     'add-birthday': handle_add_birthday,
     'show-birthday': handle_show_birthday,
-    'birthdays': handle_upcoming_birthdays
+    'update-birthday': handle_update_birthday,
+    'birthdays': handle_upcoming_birthdays,
+    'search-contact': handle_search,
+    'delete-contact': handle_delete, 
+    'update-contact': handle_update
 }
 
