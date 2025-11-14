@@ -1,7 +1,8 @@
 """Module for suggesting correct commands based on single-edit variants."""
 
-from handlers import commands
+from handlers import book_commands, note_commands, commands
 
+ALL_COMMANDS = set(book_commands.keys()) | set(note_commands.keys() | set(commands.keys()))
 
 def variants(word):
     """
@@ -31,7 +32,7 @@ def command_variants() -> dict[str, set[str]]:
         dict[str, set[str]]: Mapping of command to its variants.
     """
     variant_map = {}
-    for command in commands:
+    for command in ALL_COMMANDS:
         variant_map[command] = variants(command)
 
     return variant_map
@@ -49,7 +50,7 @@ def suggest_command(misspelled: str) -> str | None:
     """
     lower_misspelled = misspelled.lower()
 
-    if lower_misspelled in commands:
+    if lower_misspelled in ALL_COMMANDS:
         return lower_misspelled
 
     variants_map = command_variants()

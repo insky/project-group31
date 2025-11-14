@@ -1,16 +1,9 @@
 """Address Book Module."""
 
-import pickle
 from collections import UserDict
 from datetime import datetime, timedelta, date
 import re
-from pathlib import Path
-from typing import Union
 
-DATA_DIR = Path.home() / "addressbook_data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-
-FILE_PATH = DATA_DIR / "addressbook.pkl"
 
 class ValidationError(Exception):
     """Custom exception for validation errors."""
@@ -132,6 +125,7 @@ class Birthday(Field):
 
 class Email(Field):
     """Represents a contact's email address."""
+
     def __init__(self, value):
         valid = self.email_validation(value)
         if not valid:
@@ -173,7 +167,7 @@ class Record:
         address_str = self.address.value if self.address else 'N/A'
         return f"name: {name_str}; phones: {phones_str}; birthday: {birthday_str}; email: {email_str}; address: {address_str}"
 
-    def add_email(self, email:str) -> None:
+    def add_email(self, email: str) -> None:
         """
         Adds an email to the contact or updates the existing one.
 
@@ -275,33 +269,6 @@ class Record:
 
 class AddressBook(UserDict):
     """Represents the address book."""
-
-    @staticmethod
-    def load(filename: Union[Path, str] = FILE_PATH) -> 'AddressBook':
-        """
-        Loads the address book from a file.
-
-        Args:
-            filename (str): The file name to load from.
-        Returns:
-            AddressBook: The loaded address book.
-        """
-        try:
-            with open(filename, 'rb') as file:
-                return pickle.load(file)
-        except (FileNotFoundError, EOFError):
-            return AddressBook()
-
-    def save(self, filename: Union[Path, str] = FILE_PATH) -> None:
-        """
-        Saves the address book to a file.
-
-        Args:
-            filename (str): The file name to save to.
-        """
-
-        with open(filename, 'wb') as file:
-            pickle.dump(self, file)
 
     def add_record(self, record: Record) -> None:
         """

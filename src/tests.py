@@ -21,6 +21,8 @@ from handlers import (
     handle_add, handle_change, handle_phone, handle_all,
     handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays
 )
+from note_book import NotesBook, Note
+from storage import save, load
 
 
 class TestCaseWithMockDatetime(unittest.TestCase):
@@ -400,9 +402,9 @@ class TestAddressBook(TestCaseWithMockDatetime):
             temp_filename = temp_file.name
 
         try:
-            book.save(temp_filename)
+            save(book,temp_filename)
 
-            loaded_book = AddressBook.load(temp_filename)
+            loaded_book = load(temp_filename, default_factory=AddressBook)
 
             self.assertEqual(len(loaded_book.data), 2)
             self.assertIn("John", loaded_book.data)
@@ -429,7 +431,7 @@ class TestAddressBook(TestCaseWithMockDatetime):
     def test_load_nonexistent_file(self):
         """Test loading from non-existent file returns empty AddressBook."""
         nonexistent_file = "definitely_does_not_exist.pkl"
-        loaded_book = AddressBook.load(nonexistent_file)
+        loaded_book = load(nonexistent_file, default_factory=AddressBook)
         self.assertIsInstance(loaded_book, AddressBook)
         self.assertEqual(len(loaded_book.data), 0)
 
@@ -440,13 +442,85 @@ class TestAddressBook(TestCaseWithMockDatetime):
 
         try:
             # File is empty, so loading should return empty AddressBook
-            loaded_book = AddressBook.load(temp_filename)
+            loaded_book =load(temp_filename, default_factory= AddressBook)
             self.assertIsInstance(loaded_book, AddressBook)
             self.assertEqual(len(loaded_book.data), 0)
         finally:
             if os.path.exists(temp_filename):
                 os.unlink(temp_filename)
 
+class TestNoteBook(TestCaseWithMockDatetime):
+    """Test cases for NoteBook class."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.note_book = NotesBook()
+        self.note1 = Note("Prepare for blackouts")
+        self.note1.add_tags({"home", "urgent"})
+        self.note2 = Note("Yoga")
+        self.note2.add_tags({"self-care"})
+
+    def test_add_note(self):
+        """Test adding a record."""
+        self.note_book.add_note(self.note1)
+        self.assertIn(self.note1.id, self.note_book.data)
+        self.assertEqual(self.note_book.data[self.note1.id], self.note1)
+
+    def test_find_existing_note(self):
+        """Test finding existing note by id."""
+        self.note_book.add_note(self.note1)
+        self.note_book.add_note(self.note2)
+
+        found = self.note_book.find_by_id(self.note1.id)
+        self.assertIs(found, self.note1)
+        self.assertEqual(found.text, "Prepare for blackouts")
+        self.assertEqual(found.tags, {"home", "urgent"})
+
+    def test_find_non_existing_note(self):
+        """Test finding non-existent note returns None."""
+        self.note_book.add_note(self.note1)
+
+        found = self.note_book.find_by_id("999")
+        self.assertIsNone(found)
+
+    def test_delete_existing_note(self):
+        """Test deleting existing note."""
+        self.note_book.add_note(self.note1)
+        self.assertIn(self.note1.id, self.note_book.data)
+
+        self.note_book.delete_note(self.note1.id)
+
+        self.assertNotIn(self.note1.id, self.note_book.data)
+
+    def test_find_by_tag_returns_matching_notes(self):
+        """Test finding notes by existing tag."""
+        self.note_book.add_note(self.note1)
+        self.note_book.add_note(self.note2)
+
+        result = self.note_book.find_by_tag("home")
+
+        self.assertIn(self.note1, result)
+        self.assertNotIn(self.note2, result)
+
+    def test_find_by_tag_no_matches_returns_empty_list(self):
+        """Test finding notes by tag with no matches."""
+        self.note_book.add_note(self.note1)
+        self.note_book.add_note(self.note2)
+
+        result = self.note_book.find_by_tag("non-existent-tag")
+
+        self.assertIsInstance(result, list)
+        self.assertEqual(len(result), 0)
+
+    def test_sort_by_tags(self):
+        """Test sorting notes by tags (alphabetical by first tag)."""
+        self.note_book.add_note(self.note1)
+        self.note_book.add_note(self.note2)
+
+        sorted_notes = self.note_book.sort_by_tags()
+        #home < self-care
+        self.assertEqual(sorted_notes[0], self.note1)
+        self.assertEqual(sorted_notes[1], self.note2)
 
 class TestParseInput(TestCaseWithMockDatetime):
     """Test cases for parse_input function."""
@@ -482,6 +556,7 @@ class TestHandlers(TestCaseWithMockDatetime):
     def setUp(self):
         """Set up test fixtures."""
         self.book = AddressBook()
+        self.notes = NotesBook()
         self.record = Record("John")
         self.record.add_phone("1234567890")
         self.book.add_record(self.record)
@@ -501,7 +576,7 @@ class TestHandlers(TestCaseWithMockDatetime):
     @patch('handlers.sys.exit')
     def test_handle_exit(self, mock_exit):
         """Test exit handler."""
-        handle_exit(self.book)
+        handle_exit(self.book, self.notes)
         mock_exit.assert_called_once_with(0)
 
     def test_handle_add_new_contact(self):
