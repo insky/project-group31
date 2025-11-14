@@ -167,14 +167,11 @@ class Record:
 
     def __str__(self):
         name_str = self.name.value
-        phones_str = ', '.join(p.value for p in self.phones)
+        phones_str = ', '.join(p.value for p in self.phones) 
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
         email_str = self.email.value if self.email else 'N/A'
         address_str = self.address.value if self.address else 'N/A'
-        return (
-            f"Contact name: {name_str}, phones: {phones_str}, "
-            f"birthday: {birthday_str}, email: {email_str}, "
-            f"address: {address_str}"
+        return (f"name: {name_str}; phones: {phones_str}; birthday: {birthday_str}; email: {email_str}; address: {address_str}"
         )
 
     def add_email(self, email:str) -> None:
@@ -279,6 +276,12 @@ class Record:
         """
         self.birthday = Birthday(birthday)
 
+    def change_birthday(self, birthday: str) -> None:
+        if str(self.birthday) != birthday:
+            self.birthday = Birthday(birthday)
+            return 'Birthday changed'
+        return 'Birthday not changed'
+
     def add_address(self, address: str) -> None:
         """
         Adds an address to the contact.
@@ -286,7 +289,7 @@ class Record:
         Args:
             address (str)
         """
-        self.address = Address(address)
+        self.address = Address(address)     
 
 
 class AddressBook(UserDict):
@@ -339,6 +342,56 @@ class AddressBook(UserDict):
             Record | None: The record if found, None otherwise.
         """
         return self.data.get(name)
+    
+    def find_by_phone(self, phone_query: str) -> list:
+        """
+        Finds records that have a phone number matching or containing the query.
+        """
+        phone_query = phone_query.strip()
+        return [
+            record for record in self.data.values()
+            if any(phone_query in phone.value for phone in record.phones)
+        ]
+
+    def find_by_email(self, email_query: str) -> list:
+        """
+        Finds records with an email containing the given query (case-insensitive).
+        """
+        email_query = email_query.strip().lower()
+        return [
+            record for record in self.data.values()
+            if record.email and email_query in record.email.value.lower()
+        ]
+
+    def find_by_address(self, address_query: str) -> list:
+        """
+        Finds records with an address containing the given query (case-insensitive).
+        """
+        address_query = address_query.strip().lower()
+        return [
+            record for record in self.data.values()
+            if record.address and address_query in record.address.value.lower()
+        ]
+
+    def find_by_birthday(self, date_query: str) -> list:
+        """
+        Finds records whose birthday matches or partially matches the query.
+        Example: '09.11' or '1990' or full '09.11.1990'.
+        """
+        date_query = date_query.strip()
+        return [
+            record for record in self.data.values()
+            if record.birthday and date_query in record.birthday.value.strftime("%d.%m.%Y")
+        ]
+    
+    def update(self, name: str, email: str, address: str):
+        record = self.find(name)
+        if str(record.email) != email or str(record.address) != address:
+            record.email = email
+            record.address = address
+            return 'Contact Updated'
+        return 'Contact Not Updated'
+
 
     def delete(self, name: str) -> None:
         """
@@ -376,3 +429,25 @@ class AddressBook(UserDict):
                 })
 
         return upcoming_birthdays
+    
+    def search(self, query) -> list:
+        query = query.strip()
+
+        results = set()
+        record = self.find(query)
+        if record:
+            results.add(record)
+
+        results.update(self.find_by_phone(query))
+        results.update(self.find_by_email(query))
+        results.update(self.find_by_birthday(query))
+        results.update(self.find_by_address(query))
+        return list(results)
+    
+    def __str__(self):
+        output = []
+        if self.data.values():
+            for record in self.data.values():
+                output.append(str(record))
+            return '\n- '.join(output)
+        return 'No contacts found'
