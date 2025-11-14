@@ -1,6 +1,10 @@
 import secrets
 from collections import UserDict
 
+
+class NoteError(Exception):
+    pass
+
 class Note:
     """Represents the note"""
 
@@ -19,6 +23,24 @@ class Note:
             for t in tags:
                 self.tags.add(t)
 
+    def update_text(self, new_text: str):
+        self.text = new_text
+
+    def delete_tag(self, tag: str):
+        tag = tag.strip().lower()
+        if tag in self.tags:
+            self.tags.remove(tag)
+        else:
+            raise NoteError(f"Tag '{tag}' not found")
+
+    def update_tag(self, old_tag: str, new_tag: str):
+        old_tag = old_tag.strip().lower()
+        new_tag = new_tag.strip().lower()
+        if old_tag not in self.tags:
+            raise NoteError(f"Tag '{old_tag}' doesn't exit")
+        self.tags.remove(old_tag)
+        self.tags.add(new_tag)
+
 
 class NotesBook(UserDict[str, Note]):
     """Represents the address book."""
@@ -35,7 +57,7 @@ class NotesBook(UserDict[str, Note]):
     def delete_note(self, note_id: str):
         """delete note by id"""
         if note_id not in self.data:
-            raise KeyError(f"Нотатки за номером {note_id} не існує")
+            raise NoteError(f"No such note by id {note_id} exists")
         del self.data[note_id]
 
     def find_by_id(self, note_id: str) -> Note:
@@ -45,6 +67,27 @@ class NotesBook(UserDict[str, Note]):
     def find_by_tag(self, tag: str):
         """Find all notes that have a specific tags."""
         return [note for note in self.data.values() if tag in note.tags]
+    
+    def edit_note_text(self, note_id: str, new_text: str):
+        note = self.find_by_id(note_id)
+        if not note:
+            raise NoteError(f"Note id={note_id} does not exist")
+        note.update_text(new_text)
+        return note
+
+    def delete_tag_from_note(self, note_id: str, tag: str):
+        note = self.find_by_id(note_id)
+        if not note:
+            raise NoteError(f"Note id={note_id} does not exist")
+        note.delete_tag(tag)
+        return note
+
+    def update_note_tag(self, note_id: str, old_tag: str, new_tag: str):
+        note = self.find_by_id(note_id)
+        if not note:
+            raise NoteError(f"Note id={note_id} does not exist")
+        note.update_tag(old_tag, new_tag)
+        return note
 
     def sort_by_tags(self):
         """Sort notes by tags (first tag in alphabetical order)"""
