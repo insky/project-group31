@@ -463,8 +463,8 @@ class TestNoteBook(TestCaseWithMockDatetime):
     def test_add_note(self):
         """Test adding a record."""
         self.note_book.add_note(self.note1)
-        self.assertIn("1", self.note_book.data)
-        self.assertEqual(self.note_book.data["1"], self.note1)
+        self.assertIn(self.note1.id, self.note_book.data)
+        self.assertEqual(self.note_book.data[self.note1.id], self.note1)
 
     def test_find_existing_note(self):
         """Test finding existing note by id."""
@@ -556,6 +556,7 @@ class TestHandlers(TestCaseWithMockDatetime):
     def setUp(self):
         """Set up test fixtures."""
         self.book = AddressBook()
+        self.notes = NotesBook()
         self.record = Record("John")
         self.record.add_phone("1234567890")
         self.book.add_record(self.record)
@@ -575,7 +576,7 @@ class TestHandlers(TestCaseWithMockDatetime):
     @patch('handlers.sys.exit')
     def test_handle_exit(self, mock_exit):
         """Test exit handler."""
-        handle_exit(self.book)
+        handle_exit(self.book, self.notes)
         mock_exit.assert_called_once_with(0)
 
     def test_handle_add_new_contact(self):

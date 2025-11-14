@@ -1,14 +1,13 @@
+import secrets
 from collections import UserDict
 
 class Note:
     """Represents the note"""
-    _counter = 0
 
     def __init__(self, text: str):
-        Note._counter += 1
         self.text = text
         self.tags: set[str] = set()
-        self.id = str(Note._counter)
+        self.id = secrets.token_hex(3)
 
     def __repr__(self):
         return (f"Note(id={self.id!r}, "

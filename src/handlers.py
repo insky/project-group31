@@ -1,7 +1,8 @@
 """Handlers for user commands."""
-
+import shlex
 import sys
 from address_book import AddressBook, Record, ValidationError
+from note_book import NotesBook, Note
 from storage import save
 
 
@@ -15,7 +16,7 @@ def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     Returns:
         tuple[str | None, list[str]]: A tuple containing the command and arguments.
     """
-    parts = user_input.split()
+    parts = shlex.split(user_input)
     if not parts:
         return None, []
 
@@ -39,6 +40,7 @@ def input_error(func):
         ValueError: If invalid input.
         ValidationError: If validation fails.
     """
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -52,6 +54,7 @@ def input_error(func):
             return "Contact not found"
         except ValidationError as ve:
             return str(ve)
+
     return wrapper
 
 
@@ -70,16 +73,18 @@ def handle_hello(_: AddressBook):
 
 
 @input_error
-def handle_exit(book: AddressBook):
+def handle_exit(book: AddressBook, notes: NotesBook):
     """
     Exits the program.
 
     Args:
         book (AddressBook): The address book.
+        notes (NotesBook): The notes book
     """
     print("- Goodbye!")
     print()  # For a newline on exit
     save(book, "addressbook.pkl")
+    save(notes, "notes.pkl")
     sys.exit(0)
 
 
@@ -191,6 +196,7 @@ def handle_all(book: AddressBook):
 
     return str(book)
 
+
 @input_error
 def handle_search(book: AddressBook, query: str) -> str:
     """
@@ -279,6 +285,7 @@ def handle_upcoming_birthdays(book: AddressBook):
         result.append(f"{item['name']}: {item['congratulation_day'].strftime('%d.%m.%Y')}")
     return "\n".join(result)
 
+
 @input_error
 def handle_update_birthday(book: AddressBook, name: str, birthday: str):
     """
@@ -297,6 +304,7 @@ def handle_update_birthday(book: AddressBook, name: str, birthday: str):
         record.add_birthday(birthday)
         return 'Birthday updated'
     return 'Contact not found'
+
 
 @input_error
 def handle_update_email(book: AddressBook, name: str, email: str):
@@ -337,6 +345,7 @@ def handle_update_address(book: AddressBook, name: str, address: str):
         return 'Address updated'
     return 'Contact not found'
 
+
 @input_error
 def handle_delete(book: AddressBook, name: str):
     """
@@ -355,12 +364,51 @@ def handle_delete(book: AddressBook, name: str):
         return 'Contact deleted'
     return 'Contact not found'
 
+@input_error
+def handle_add_note(notes: NotesBook, *args: str) -> str:
+    """
+    add-note <text> [--tags tag1 tag2 ...]
+    """
+    if not args:
+        return "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"
+
+    if "--tags" in args:
+        tag_index = args.index("--tags")
+
+        text_parts = args[:tag_index]
+        tag_parts = args[tag_index + 1:]
+    else:
+        text_parts = args
+        tag_parts = []
+
+    text = " ".join(text_parts).strip()
+    if not text:
+        return "Note text cannot be empty."
+
+    tags = set()
+    for raw_tag in tag_parts:
+        cleaned = raw_tag.lstrip("#").strip().lower()
+        if cleaned:
+            tags.add(cleaned)
+
+    note = Note(text)
+    if tags:
+        note.add_tags(tags)
+
+    notes.add_note(note)
+
+    tags_str = f" tags={sorted(tags)}" if tags else ""
+    return f"Note added with id {note.id}.{tags_str}. {note.text}"
+
 
 commands: dict = {
-    'hello': handle_hello,
-    'help': handle_help,
     'close': handle_exit,
     'exit': handle_exit,
+}
+
+book_commands: dict = {
+    'hello': handle_hello,
+    'help': handle_help,
     'add': handle_add,
     'change': handle_change,
     'phone': handle_phone,
@@ -372,5 +420,9 @@ commands: dict = {
     'search-contact': handle_search,
     'delete-contact': handle_delete,
     'update-email': handle_update_email,
-    'update-address': handle_update_address
+    'update-address': handle_update_address,
+}
+
+note_commands = {
+    'add-note': handle_add_note,
 }
