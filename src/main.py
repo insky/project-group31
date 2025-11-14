@@ -3,7 +3,7 @@
 from handlers import book_commands, parse_input, handle_exit, note_commands
 from address_book import AddressBook
 from intelligent_command import suggest_command  # New import
-from src.note_book import NotesBook
+from note_book import NotesBook
 from storage import load
 
 

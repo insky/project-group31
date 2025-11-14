@@ -2,7 +2,7 @@
 import shlex
 import sys
 from address_book import AddressBook, Record, ValidationError
-from note_book import NotesBook, Note
+from note_book import NotesBook, Note, NoteError
 from storage import save
 
 
@@ -54,6 +54,8 @@ def input_error(func):
             return "Contact not found"
         except ValidationError as ve:
             return str(ve)
+        except NoteError as ne:
+            return str(ne)
 
     return wrapper
 
@@ -113,7 +115,16 @@ def handle_help(_: AddressBook):
     birthdays - Show upcoming birthdays in the next week
     search-contact <query> - Show records that match query by either name, phone, email, or address
     delete-contact <name> - Delete contact by name
-    update-contact <name> <email> <address>"""
+    update-contact <name> <email> <address>
+    add-note <text> [--tags tag1 tag2 ...] - Adds new note
+    all-notes - Returns all notes information
+    find-note-tag <tag> - Finds a note by tag
+    sort-notes - Sortes notes by their tags in alphabetic order
+    edit-note <id> <new text> - Edit note text
+    delete-note <id> - Delete note
+    add-tag <id> <tag1 tag2 ...> - Add tags to a note
+    delete-tag <id> <tag> - Remove tag from a note
+    update-tag <id> <old> <new> - Rename a tag in a note"""
 
     return help_text
 
@@ -481,6 +492,50 @@ def handle_sort_notes_by_tags(notes: NotesBook) -> str:
 
     return "\n".join(lines)
 
+@input_error
+def handle_update_note(notes: NotesBook, note_id: str, *new_text_parts: str):
+    if not new_text_parts:
+        return "Please provide new note text."
+
+    new_text = " ".join(new_text_parts).strip()
+    if not new_text:
+        return "New text cannot be empty."
+
+    note = notes.edit_note_text(note_id, new_text)
+    return f"Note {note_id} updated: {note.text}"
+
+@input_error
+def handle_delete_note(notes: NotesBook, note_id: str):
+    notes.delete_note(note_id)
+    return f"Note {note_id} deleted."
+
+@input_error
+def handle_add_tag(notes: NotesBook, note_id: str, *tags: str):
+    if not tags:
+        return "Please provide at least one tag."
+
+    cleaned = {t.lstrip('#').lower() for t in tags if t.strip()}
+    if not cleaned:
+        return "No valid tags provided."
+
+    note = notes.find_by_id(note_id)
+    if not note:
+        return "Note not found."
+
+    note.add_tags(cleaned)
+
+    return f"Tags added to note {note_id}: {sorted(cleaned)}"
+
+@input_error
+def handle_delete_tag(notes: NotesBook, note_id: str, tag: str):
+    note = notes.delete_tag_from_note(note_id, tag)
+    return f"Tag '{tag}' removed from note {note_id}."
+
+@input_error
+def handle_update_tag(notes: NotesBook, note_id: str, old_tag: str, new_tag: str):
+    note = notes.update_note_tag(note_id, old_tag, new_tag)
+    return f"Tag '{old_tag}' updated to '{new_tag}' in note {note_id}."
+
 
 commands: dict = {
     'close': handle_exit,
@@ -508,5 +563,10 @@ note_commands = {
     'add-note': handle_add_note,
     'all-notes': handle_all_notes,
     'find-note-tag': handle_find_note_by_tag,
-    'sort-notes': handle_sort_notes_by_tags
+    'sort-notes': handle_sort_notes_by_tags,
+    'update-note': handle_update_note,
+    'delete-note': handle_delete_note,
+    'add-tag': handle_add_tag,
+    'delete-tag': handle_delete_tag,
+    'update-tag': handle_update_tag
 }
