@@ -204,7 +204,7 @@ class TestRecord(TestCaseWithMockDatetime):
         record.add_birthday("15.08.1990")
         record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: 15.08.1990, email: N/A, address: Silly"
+        expected = "name: John; phones: 1234567890; birthday: 15.08.1990; email: N/A; address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_record_str_no_birthday(self):
@@ -213,7 +213,7 @@ class TestRecord(TestCaseWithMockDatetime):
         record.add_phone("1234567890")
         record.add_address("Silly")
 
-        expected = "Contact name: John, phones: 1234567890, birthday: N/A, email: N/A, address: Silly"
+        expected = "name: John; phones: 1234567890; birthday: N/A; email: N/A; address: Silly"
         self.assertEqual(str(record), expected)
 
     def test_add_phone_valid(self):
