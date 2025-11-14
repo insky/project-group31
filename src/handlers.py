@@ -364,6 +364,7 @@ def handle_delete(book: AddressBook, name: str):
         return 'Contact deleted'
     return 'Contact not found'
 
+
 @input_error
 def handle_add_note(notes: NotesBook, *args: str) -> str:
     """
@@ -401,6 +402,86 @@ def handle_add_note(notes: NotesBook, *args: str) -> str:
     return f"Note added with id {note.id}.{tags_str}. {note.text}"
 
 
+@input_error
+def handle_all_notes(notes: NotesBook):
+    """
+    Lists all notes.
+
+    Args:
+        notes (NotesBook): The notes book.
+
+    Returns:
+        str: The list of notes or message if none.
+    """
+    if not notes.data:
+        return "No notes found."
+
+    try:
+        all_notes = notes.list_notes()
+    except AttributeError:
+        all_notes = list(notes.data.values())
+
+    lines: list[str] = []
+    for idx, note in enumerate(all_notes, start=1):
+        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
+        lines.append(f"{idx}. (id={note.id}) [{tags_str}] {note.text}")
+
+    return "\n".join(lines)
+
+
+@input_error
+def handle_find_note_by_tag(notes: NotesBook, tag: str) -> str:
+    """
+    Finds notes by tag.
+
+    Args:
+        notes (NotesBook): The notes book.
+        tag (str): The tag to search for.
+
+    Returns:
+        str: The list of notes with this tag or a message if none.
+    """
+    normalized = tag.lstrip("#").strip().lower()
+    if not normalized:
+        return "Please provide a non-empty tag."
+
+    result = notes.find_by_tag(normalized)
+
+    if not result:
+        return f'No notes found for tag "{normalized}".'
+
+    lines: list[str] = []
+    for note in result:
+        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
+        lines.append(f"(id={note.id}) [{tags_str}] {note.text}")
+
+    return "\n".join(lines)
+
+
+@input_error
+def handle_sort_notes_by_tags(notes: NotesBook) -> str:
+    """
+    Sorts notes by their tags (alphabetically by the first tag).
+
+    Args:
+        notes (NotesBook): The notes book.
+
+    Returns:
+        str: Sorted notes or a message if none.
+    """
+    sorted_notes = notes.sort_by_tags()
+
+    if not sorted_notes:
+        return "No notes found."
+
+    lines = []
+    for note in sorted_notes:
+        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
+        lines.append(f"(id={note.id}) [{tags_str}] {note.text}")
+
+    return "\n".join(lines)
+
+
 commands: dict = {
     'close': handle_exit,
     'exit': handle_exit,
@@ -425,4 +506,7 @@ book_commands: dict = {
 
 note_commands = {
     'add-note': handle_add_note,
+    'all-notes': handle_all_notes,
+    'find-note-tag': handle_find_note_by_tag,
+    'sort-notes': handle_sort_notes_by_tags
 }
