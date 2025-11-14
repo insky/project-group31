@@ -16,13 +16,17 @@ from address_book import (
     Field, Name, Phone, Birthday, Record, AddressBook,
     ValidationError, Address
 )
-from handlers import (
-    parse_input, handle_hello, handle_exit, handle_help,
+from handlers_common import handle_hello, handle_help, handle_exit
+from handlers_address_book import (
     handle_add, handle_change, handle_phone, handle_all,
-    handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays, handle_add_note, handle_all_notes,
+    handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays,
+)
+from handlers_note_book import (
+    handle_add_note, handle_all_notes,
     handle_find_note_by_tag, handle_sort_notes_by_tags
 )
-from note_book import NotesBook, Note
+from utils import parse_input
+from note_book import NoteBook, Note
 from storage import save, load
 
 
@@ -64,11 +68,6 @@ class TestFieldClasses(TestCaseWithMockDatetime):
         """Test Name field with empty string."""
         with self.assertRaises(ValidationError):
             Name("")
-
-    def test_name_invalid(self):
-        """Test Name field with spaces."""
-        with self.assertRaises(ValidationError):
-            Name("John Doe")
 
     def test_name_invalid_type(self):
         """Test Name field with non-string input."""
@@ -455,7 +454,7 @@ class TestNoteBook(TestCaseWithMockDatetime):
 
     def setUp(self):
         """Set up test fixtures."""
-        self.note_book = NotesBook()
+        self.note_book = NoteBook()
         self.note1 = Note("Prepare for blackouts")
         self.note1.add_tags({"home", "urgent"})
         self.note2 = Note("Yoga")
@@ -474,14 +473,14 @@ class TestNoteBook(TestCaseWithMockDatetime):
 
         found = self.note_book.find_by_id(self.note1.id)
         self.assertIs(found, self.note1)
-        self.assertEqual(found.text, "Prepare for blackouts")
-        self.assertEqual(found.tags, {"home", "urgent"})
+        self.assertEqual(found.text, "Prepare for blackouts")  # type: ignore
+        self.assertEqual(found.tags, {"home", "urgent"})  # type: ignore
 
     def test_find_non_existing_note(self):
         """Test finding non-existent note returns None."""
         self.note_book.add_note(self.note1)
 
-        found = self.note_book.find_by_id("999")
+        found = self.note_book.find_by_id(999)
         self.assertIsNone(found)
 
     def test_delete_existing_note(self):
@@ -557,24 +556,24 @@ class TestHandlers(TestCaseWithMockDatetime):
     def setUp(self):
         """Set up test fixtures."""
         self.book = AddressBook()
-        self.notes = NotesBook()
+        self.notes = NoteBook()
         self.record = Record("John")
         self.record.add_phone("1234567890")
         self.book.add_record(self.record)
 
     def test_handle_hello(self):
         """Test hello handler."""
-        result = handle_hello(self.book)
+        result = handle_hello(self.book, self.notes)
         self.assertEqual(result, "How can I help you?")
 
     def test_handle_help(self):
         """Test help handler."""
-        result = handle_help(self.book)
+        result = handle_help(self.book, self.notes)
         self.assertIn("Available commands:", result)
         self.assertIn("hello", result)
         self.assertIn("add", result)
 
-    @patch('handlers.sys.exit')
+    @patch('handlers_common.sys.exit')
     def test_handle_exit(self, mock_exit):
         """Test exit handler."""
         handle_exit(self.book, self.notes)

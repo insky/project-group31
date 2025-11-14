@@ -1,27 +1,29 @@
-import secrets
+"""Module for notes book management."""
 from collections import UserDict
-
 
 class NoteError(Exception):
     pass
 
+from storage import load, save
 class Note:
     """Represents the note"""
 
+    last_id: int = 1
+
     def __init__(self, text: str):
         self.text = text
-        self.tags: set[str] = set()
-        self.id = secrets.token_hex(3)
+        self.tags = set()
+        self.id = Note.last_id
+        Note.last_id += 1
 
     def __repr__(self):
-        return (f"Note(id={self.id!r}, "
-                f"text={self.text!r}, "
-                f"tags={list(self.tags)!r} ")
+        return (f"Note(id={self.id}, "
+                f"text={self.text}, "
+                f"tags={self.sorted_tags} ")
 
     def add_tags(self, tags: set[str]):
-        if tags:
-            for t in tags:
-                self.tags.add(t)
+        """Add tags to the note."""
+        self.tags.update(tags)
 
     def update_text(self, new_text: str):
         self.text = new_text
@@ -41,9 +43,32 @@ class Note:
         self.tags.remove(old_tag)
         self.tags.add(new_tag)
 
+    @property
+    def sorted_tags(self) -> str:
+        """Return tags sorted in alphabetical order as a string."""
+        return ' '.join(sorted(self.tags))
 
-class NotesBook(UserDict[str, Note]):
-    """Represents the address book."""
+
+class NoteBook(UserDict[int, Note]):
+    """Represents the notes book."""
+
+    FILENAME = "notebook.pkl"
+
+    @staticmethod
+    def load() -> 'NoteBook':
+        """Load notes book from storage."""
+        stored_data = load(NoteBook.FILENAME, default_factory=NoteBook)
+
+        if isinstance(stored_data, NoteBook):
+            return stored_data
+
+        book, last_id = stored_data
+        Note.last_id = int(last_id)
+        return book
+
+    def save(self):
+        """Save notes book to storage."""
+        save((self, Note.last_id), NoteBook.FILENAME)
 
     def add_note(self, note: Note) -> Note:
         """Create note and add it to the dictionary"""
@@ -54,35 +79,33 @@ class NotesBook(UserDict[str, Note]):
         """Return list of notes sorted by id."""
         return [self.data[nid] for nid in sorted(self.data.keys())]
 
-    def delete_note(self, note_id: str):
+    def delete_note(self, note_id: int):
         """delete note by id"""
-        if note_id not in self.data:
-            raise NoteError(f"No such note by id {note_id} exists")
         del self.data[note_id]
 
-    def find_by_id(self, note_id: str) -> Note:
+    def find_by_id(self, note_id: int) -> Note | None:
         """Find note by id."""
         return self.data.get(note_id)
 
     def find_by_tag(self, tag: str):
         """Find all notes that have a specific tags."""
         return [note for note in self.data.values() if tag in note.tags]
-    
-    def edit_note_text(self, note_id: str, new_text: str):
+
+    def edit_note_text(self, note_id: int, new_text: str):
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
         note.update_text(new_text)
         return note
 
-    def delete_tag_from_note(self, note_id: str, tag: str):
+    def delete_tag_from_note(self, note_id: int, tag: str):
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
         note.delete_tag(tag)
         return note
 
-    def update_note_tag(self, note_id: str, old_tag: str, new_tag: str):
+    def update_note_tag(self, note_id: int, old_tag: str, new_tag: str):
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
@@ -93,5 +116,5 @@ class NotesBook(UserDict[str, Note]):
         """Sort notes by tags (first tag in alphabetical order)"""
         return sorted(
             self.data.values(),
-            key=lambda note: sorted(note.tags)[0] if note.tags else ""
+            key=lambda note: (note.sorted_tags)
         )

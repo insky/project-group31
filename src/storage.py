@@ -1,11 +1,13 @@
+"""Module for persistent storage using pickle."""
+
 import pickle
 from pathlib import Path
-from typing import Union, Any
+from typing import Any
 
 BASE_DIR = Path.home() / ".assistant"
 BASE_DIR.mkdir(parents=True, exist_ok=True)
 
-def _full_path(name:  Union[str, Path]) -> Path:
+def _full_path(name: str) -> Path:
     """Convert a short file name to a full path inside ~/.assistant"""
     return BASE_DIR / name
 
