@@ -136,6 +136,17 @@ class NoteBook(UserDict[int, Note]):
             key=lambda note: note.sorted_tags
         )
 
+    @staticmethod
+    def list_to_string(notes: list[Note], empty_string: str = "Note book is empty.") -> str:
+        """Return string representation of notes list."""
+        if not notes:
+            return empty_string
+
+        output = []
+        for record in notes:
+            output.append(str(record))
+        return '\n  '.join(output)
+
     def __str__(self):
         if not self.data:
             return "Note book is empty."

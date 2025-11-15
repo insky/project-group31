@@ -51,15 +51,7 @@ def handle_all_notes(notes: NoteBook):
     Returns:
         str: The list of notes or message if none.
     """
-    result = notes.list_notes()
-    if not result:
-        return "Note book is empty."
-
-    lines = []
-    for note in result:
-        lines.append(str(note))
-
-    return "\n- ".join(lines)
+    return NoteBook.list_to_string(notes.list_notes())
 
 
 @input_error('Note')
@@ -80,14 +72,7 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
 
     result = notes.find_by_tag(normalized)
 
-    if not result:
-        return f'No notes found for tag "{normalized}".'
-
-    lines = []
-    for note in result:
-        lines.append(str(note))
-
-    return "\n- ".join(lines)
+    return NoteBook.list_to_string(result, empty_string=f'No notes found for tag "{normalized}".')
 
 
 @input_error('Note')
@@ -108,14 +93,7 @@ def handle_search_note(notes: NoteBook, *args: str) -> str:
 
     result = notes.search_by_text(normalized)
 
-    if not result:
-        return f'No notes found containing "{normalized}".'
-
-    lines = []
-    for note in result:
-        lines.append(str(note))
-
-    return "\n- ".join(lines)
+    return NoteBook.list_to_string(result, empty_string=f'No notes found containing "{normalized}".')
 
 
 @input_error('Note')
