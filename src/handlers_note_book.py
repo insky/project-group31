@@ -7,7 +7,7 @@ from utils import input_error
 @input_error('Note')
 def handle_add_note(notes: NoteBook, *args: str) -> str:
     """
-    add-note <text> [--tags tag1 tag2 ...]
+    add-note <text> [--tags tag1 [tag2 [...]]]
     """
     if not args:
         return "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"

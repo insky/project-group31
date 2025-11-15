@@ -27,24 +27,27 @@ def handle_help(_a, _n):
     hello - Greet the bot
     help - Show this help message
     exit | close - Exit the bot
-    add <name> <phone> - Add a new contact
-    change <name> <old_phone> <new_phone> - Change the phone number of a contact
-    phone <name> - Get the phone number of a contact
-    all - List all contacts
+
+    add-contact <name> [<phone>] [<email>] - Add a new contact
+    change-contact <name> <old_phone> <new_phone> - Change the phone number of a contact
+    show-phone <name> - Get the phone numbers of a contact
+    all-contacts - List all contacts
     add-birthday <name> <birthday> - Add a birthday for a contact
     show-birthday <name> - Show the birthday of a contact
     update-birthday <name> <birthday> - Updates birthday for a contact
     birthdays - Show upcoming birthdays in the next week
     search-contact <query> - Show records that match query by either name, phone, email, or address
     delete-contact <name> - Delete contact by name
-    update-contact <name> <email> <address>
-    add-note <text> [--tags tag1 tag2 ...] - Adds new note
+    update-email <name> <email> - Updates email for a contact
+    update-address <name> <address> - Updates address for a contact
+
+    add-note <text> [--tags tag1 [tag2 [...]]] - Adds new note
     all-notes - Returns all notes information
     find-note-tag <tag> - Finds a note by tag
     sort-notes - Sortes notes by their tags in alphabetic order
-    edit-note <id> <new text> - Edit note text
+    update-note <id> <new text> - Edit note text
     delete-note <id> - Delete note
-    add-tag <id> <tag1 tag2 ...> - Add tags to a note
+    add-tag <id> <tag1> [<tag2> [...]] - Add tags to a note
     delete-tag <id> <tag> - Remove tag from a note
     update-tag <id> <old> <new> - Rename a tag in a note"""
 

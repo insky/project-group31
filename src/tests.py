@@ -18,7 +18,7 @@ from address_book import (
 )
 from handlers_common import handle_hello, handle_help, handle_exit
 from handlers_address_book import (
-    handle_add, handle_change, handle_phone, handle_all,
+    handle_add_contact, handle_change_contact, handle_phone, handle_all,
     handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays,
 )
 from handlers_note_book import (
@@ -581,35 +581,35 @@ class TestHandlers(TestCaseWithMockDatetime):
 
     def test_handle_add_new_contact(self):
         """Test adding new contact."""
-        result = handle_add(self.book, "Jane", "0987654321", "jane@example.com")
+        result = handle_add_contact(self.book, "Jane", "0987654321", "jane@example.com")
         self.assertEqual(result, "Contact added")
         self.assertIn("Jane", self.book.data)
 
     def test_handle_add_existing_contact(self):
         """Test adding phone to existing contact."""
-        result = handle_add(self.book, "John", "0987654321", "john@example.com")
+        result = handle_add_contact(self.book, "John", "0987654321", "john@example.com")
         self.assertEqual(result, "Contact updated")
         self.assertEqual(len(self.book.data["John"].phones), 2)
 
     def test_handle_add_invalid_phone(self):
         """Test adding contact with invalid phone."""
-        result = handle_add(self.book, "Jones", "invalid", "jones@example.com")
+        result = handle_add_contact(self.book, "Jones", "invalid", "jones@example.com")
         self.assertEqual(result, "Invalid phone number")
 
     def test_handle_change_valid(self):
         """Test changing phone number."""
-        result = handle_change(self.book, "John", "1234567890", "0987654321")
+        result = handle_change_contact(self.book, "John", "1234567890", "0987654321")
         self.assertEqual(result, "Contact updated")
         self.assertIn(Phone("0987654321"), self.book.data["John"].phones)
 
     def test_handle_change_contact_not_found(self):
         """Test changing phone for non-existent contact."""
-        result = handle_change(self.book, "Non Existent", "1234567890", "0987654321")
+        result = handle_change_contact(self.book, "Non Existent", "1234567890", "0987654321")
         self.assertEqual(result, "Contact not found")
 
     def test_handle_change_phone_not_found(self):
         """Test changing non-existent phone."""
-        result = handle_change(self.book, "John", "0987654321", "1111111111")
+        result = handle_change_contact(self.book, "John", "0987654321", "1111111111")
         self.assertEqual(result, "Old phone number not found")
 
     def test_handle_phone_existing_contact(self):
