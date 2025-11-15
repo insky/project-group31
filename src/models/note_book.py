@@ -1,7 +1,7 @@
 """Module for notes book management."""
 from collections import UserDict
-from storage import load, save
-from exceptions import NoteError
+from src.storage import load, save
+from src.models.exceptions import NoteError
 
 
 class Note:

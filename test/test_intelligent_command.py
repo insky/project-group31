@@ -2,7 +2,7 @@
 
 import unittest
 
-from intelligent_command import suggest_command
+from src.intelligent_command import suggest_command
 
 
 class SuggestCommandTests(unittest.TestCase):

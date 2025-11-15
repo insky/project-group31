@@ -1,7 +1,7 @@
 """Utility functions for the assistant bot."""
 
 import shlex
-from exceptions import ValidationError, NoteError
+from src.models.exceptions import ValidationError, NoteError
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """

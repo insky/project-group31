@@ -1,7 +1,7 @@
 """Handlers for user commands."""
 
-from address_book import AddressBook, Record
-from utils import input_error
+from src.models.address_book import AddressBook, Record
+from src.utils import input_error
 
 
 @input_error('Contact')
@@ -249,10 +249,57 @@ def handle_delete(book: AddressBook, name: str):
     return 'Contact not found'
 
 
+@input_error('Contact')
+def handle_add_phone(book: AddressBook, name: str, phone: str):
+    """
+    Adds a phone to an existing contact.
+
+    Args:
+        book (AddressBook)
+        name (str): contact name
+        phone (str): phone to add
+
+    Returns:
+        str: result message
+    """
+    record = book.find(name)
+    if record is None:
+        return "Contact not found"
+
+    record.add_phone(phone)
+    return "Phone added"
+
+
+@input_error('Contact')
+def handle_remove_phone(book: AddressBook, name: str, phone: str):
+    """
+    Removes a phone from an existing contact.
+
+    Args:
+        book (AddressBook)
+        name (str)
+        phone (str)
+
+    Returns:
+        str
+    """
+    record = book.find(name)
+    if record is None:
+        return "Contact not found"
+
+    try:
+        record.remove_phone(phone)
+        return "Phone removed"
+    except KeyError:
+        return "Phone number not found"
+
+
 commands: dict = {
     'add-contact': handle_add_contact,
     'change-contact': handle_change_contact,
     'show-phone': handle_phone,
+    'add-phone': handle_add_phone,
+    'remove-phone': handle_remove_phone,
     'all-contacts': handle_all,
     'add-birthday': handle_add_birthday,
     'show-birthday': handle_show_birthday,

@@ -12,5 +12,5 @@ python src/main.py
 ## Tests
 To run the tests, use the following command:
 ```bash
-pyton src/tests.py
+ python3 -m unittest 
 ```

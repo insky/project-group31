@@ -1,13 +1,13 @@
 """Main module for the assistant bot."""
 
 import readline
-from handlers_common import commands as commands_common, handle_exit
-from handlers_address_book import commands as commands_address_book
-from handlers_note_book import commands as commands_note_book
-from utils import parse_input, reconstruct_command
-from address_book import AddressBook
-from note_book import NoteBook
-from intelligent_command import suggest_command
+from src.handlers.handlers_common import commands as commands_common, handle_exit
+from src.handlers.handlers_address_book import commands as commands_address_book
+from src.handlers.handlers_note_book import commands as commands_note_book
+from src.utils import parse_input, reconstruct_command
+from src.models.address_book import AddressBook
+from src.models.note_book import NoteBook
+from src.intelligent_command import suggest_command
 
 def main():
     """Main function to run the assistant bot."""

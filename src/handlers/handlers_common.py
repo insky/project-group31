@@ -1,7 +1,7 @@
 """Handlers for user commands."""
 
 import sys
-from utils import input_error
+from src.utils import input_error
 
 @input_error()
 def handle_hello(_a, _n):
