@@ -1,7 +1,7 @@
 """Utility functions for the assistant bot."""
 
 import shlex
-from exceptions import ValidationError
+from exceptions import ValidationError, NoteError
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """
@@ -67,6 +67,8 @@ def input_error(item_name: str = "Item"):
                 return f"{item_name} not found"
             except ValidationError as ve:
                 return str(ve)
+            except NoteError as ne:
+                return str(ne)
 
         return wrapper
     return decorator

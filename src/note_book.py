@@ -1,10 +1,9 @@
 """Module for notes book management."""
 from collections import UserDict
-
-class NoteError(Exception):
-    pass
-
 from storage import load, save
+from exceptions import NoteError
+
+
 class Note:
     """Represents the note"""
 
@@ -26,9 +25,11 @@ class Note:
         self.tags.update(tags)
 
     def update_text(self, new_text: str):
+        """Update note text."""
         self.text = new_text
 
     def delete_tag(self, tag: str):
+        """Delete tag from the note."""
         tag = tag.strip().lower()
         if tag in self.tags:
             self.tags.remove(tag)
@@ -36,6 +37,7 @@ class Note:
             raise NoteError(f"Tag '{tag}' not found")
 
     def update_tag(self, old_tag: str, new_tag: str):
+        """Update tag in the note."""
         old_tag = old_tag.strip().lower()
         new_tag = new_tag.strip().lower()
         if old_tag not in self.tags:
@@ -92,6 +94,7 @@ class NoteBook(UserDict[int, Note]):
         return [note for note in self.data.values() if tag in note.tags]
 
     def edit_note_text(self, note_id: int, new_text: str):
+        """Edit note text by id."""
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
@@ -99,6 +102,7 @@ class NoteBook(UserDict[int, Note]):
         return note
 
     def delete_tag_from_note(self, note_id: int, tag: str):
+        """Delete tag from note by id."""
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
@@ -106,6 +110,7 @@ class NoteBook(UserDict[int, Note]):
         return note
 
     def update_note_tag(self, note_id: int, old_tag: str, new_tag: str):
+        """Update tag in note by id."""
         note = self.find_by_id(note_id)
         if not note:
             raise NoteError(f"Note id={note_id} does not exist")
