@@ -23,7 +23,7 @@ from handlers_address_book import (
 )
 from handlers_note_book import (
     handle_add_note, handle_all_notes,
-    handle_find_note_by_tag, handle_sort_notes_by_tags
+    handle_find_note_by_tag
 )
 from utils import parse_input
 from note_book import NoteBook, Note
@@ -517,7 +517,7 @@ class TestNoteBook(TestCaseWithMockDatetime):
         self.note_book.add_note(self.note1)
         self.note_book.add_note(self.note2)
 
-        sorted_notes = self.note_book.sort_by_tags()
+        sorted_notes = self.note_book.list_notes()
         #home < self-care
         self.assertEqual(sorted_notes[0], self.note1)
         self.assertEqual(sorted_notes[1], self.note2)
@@ -744,9 +744,10 @@ class TestHandlers(TestCaseWithMockDatetime):
 
     def test_handle_sort_notes_by_tags(self):
         """Test sorting notes by tags."""
-        handle_add_note(self.notes, "Yoga", "--tags", "self-care")
-        handle_add_note(self.notes, "Prepare", "--tags", "#home", "#urgent")
-        result = handle_sort_notes_by_tags(self.notes)
+        handle_add_note(self.notes, "Yoga", "--tags", "#self-care")
+        handle_add_note(self.notes, "Prepare", "--tags", "#urgent", "#home")
+        result = handle_all_notes(self.notes)
+
         lines = result.split("\n")
 
         self.assertIn("Prepare", lines[0])

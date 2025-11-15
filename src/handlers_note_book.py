@@ -51,7 +51,15 @@ def handle_all_notes(notes: NoteBook):
     Returns:
         str: The list of notes or message if none.
     """
-    return str(notes)
+    result = notes.list_notes()
+    if not result:
+        return "Note book is empty."
+
+    lines = []
+    for note in result:
+        lines.append(str(note))
+
+    return "\n- ".join(lines)
 
 
 @input_error('Note')
@@ -83,23 +91,28 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
 
 
 @input_error('Note')
-def handle_sort_notes_by_tags(notes: NoteBook) -> str:
+def handle_search_note(notes: NoteBook, *args: str) -> str:
     """
-    Sorts notes by their tags (alphabetically by the first tag).
+    Finds notes by text content.
 
     Args:
         notes (NoteBook): The notes book.
+        text (str): The text to search for.
 
     Returns:
-        str: Sorted notes or a message if none.
+        str: The list of notes containing the text or a message if none.
     """
-    sorted_notes = notes.sort_by_tags()
+    normalized = " ".join(args).strip().lower()
+    if not normalized:
+        return "Please provide non-empty text to search."
 
-    if not sorted_notes:
-        return "No notes found."
+    result = notes.search_by_text(normalized)
+
+    if not result:
+        return f'No notes found containing "{normalized}".'
 
     lines = []
-    for note in sorted_notes:
+    for note in result:
         lines.append(str(note))
 
     return "\n- ".join(lines)
@@ -200,7 +213,7 @@ commands: dict = {
     'add-note': handle_add_note,
     'all-notes': handle_all_notes,
     'find-tag': handle_find_note_by_tag,
-    'sort-notes': handle_sort_notes_by_tags,
+    'search-note': handle_search_note,
     'update-note': handle_update_note,
     'delete-note': handle_delete_note,
     'add-tag': handle_add_tag,

@@ -82,7 +82,7 @@ class NoteBook(UserDict[int, Note]):
 
     def list_notes(self):
         """Return list of notes sorted by id."""
-        return [self.data[nid] for nid in sorted(self.data.keys())]
+        return NoteBook.sort([self.data[nid] for nid in sorted(self.data.keys())])
 
     def delete_note(self, note_id: int):
         """delete note by id"""
@@ -94,7 +94,11 @@ class NoteBook(UserDict[int, Note]):
 
     def find_by_tag(self, tag: str):
         """Find all notes that have a specific tags."""
-        return [note for note in self.data.values() if tag in note.tags]
+        return NoteBook.sort([note for note in self.data.values() if tag in note.tags])
+
+    def search_by_text(self, text: str):
+        """Find all notes that contain specific text."""
+        return NoteBook.sort([note for note in self.data.values() if text.lower() in note.text.lower()])
 
     def edit_note_text(self, note_id: int, new_text: str):
         """Edit note text by id."""
@@ -121,10 +125,15 @@ class NoteBook(UserDict[int, Note]):
         return note
 
     def sort_by_tags(self):
-        """Sort notes by tags (first tag in alphabetical order)"""
+        """Sort notes by tags (tags in alphabetical order)"""
+        return NoteBook.sort(self.list_notes())
+
+    @staticmethod
+    def sort(notes: list[Note]) -> list[Note]:
+        """Sort notes by tags (tags in alphabetical order)"""
         return sorted(
-            self.data.values(),
-            key=lambda note: (note.sorted_tags)
+            notes,
+            key=lambda note: note.sorted_tags
         )
 
     def __str__(self):
