@@ -1,16 +1,18 @@
 """Main module for the assistant bot."""
 
-from handlers import book_commands, parse_input, handle_exit, note_commands
+import readline
+from handlers_common import commands as commands_common, handle_exit
+from handlers_address_book import commands as commands_address_book
+from handlers_note_book import commands as commands_note_book
+from utils import parse_input, reconstruct_command
 from address_book import AddressBook
-from intelligent_command import suggest_command  # New import
-from note_book import NotesBook
-from storage import load
-
+from note_book import NoteBook
+from intelligent_command import suggest_command
 
 def main():
     """Main function to run the assistant bot."""
-    address_book = load("addressbook.pkl", default_factory=AddressBook)
-    notes_book = load("notes.pkl", default_factory=NotesBook)
+    address_book = AddressBook.load()
+    note_book = NoteBook.load()
 
     print("Welcome to the assistant bot!")
     while True:
@@ -18,7 +20,7 @@ def main():
             user_input = input("\nEnter a command: ")
         except (KeyboardInterrupt, EOFError):
             print()  # For a Ctrl+C newline on exit
-            handle_exit(address_book, notes_book)
+            handle_exit(address_book, note_book)
             continue # Just for linters, won't be reached
 
         command, args = parse_input(user_input)
@@ -27,38 +29,31 @@ def main():
             print("- No command entered.")
             continue
 
-        if command in ("exit", "close"):
-            handle_exit(address_book, notes_book)
+        if command in commands_address_book:
+            handler = commands_address_book[command]
+            result = handler(address_book, *args)
+            print(f"- {result}")
             continue
 
-        # search in book_commands
-        func = book_commands.get(command)
-        target = "address"
-
-        # if not exist search in the notes_commands
-        if func is None:
-            func = note_commands.get(command)
-            target = "notes"
-
-
-        if func is None:
-            suggestion = suggest_command(command)
-
-            if suggestion:
-                args_str = " ".join(args)
-                if args_str:
-                    print(f'- Did you mean "{suggestion} {args_str}"?')
-                else:
-                    print(f'- Did you mean "{suggestion}"?')
-            else:
-                print("- Invalid command.")
+        if command in commands_note_book:
+            handler = commands_note_book[command]
+            result = handler(note_book, *args)
+            print(f"- {result}")
             continue
 
-        if target == "address":
-            print('-', func(address_book, *args))
-        else:
-            print('-', func(notes_book, *args))
+        if command in commands_common:
+            handler = commands_common[command]
+            result = handler(address_book, note_book, *args)
+            print(f"- {result}")
+            continue
 
+        print(f"- Unknown command: {command}")
+
+        suggestions = suggest_command(command)
+        if suggestions:
+            print('- Did you mean one of these?')
+            for suggestion in suggestions[:3]: # Show top 3 suggestions
+                print(f'\t{reconstruct_command(suggestion, args)}')
 
 if __name__ == "__main__":
     main()

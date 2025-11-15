@@ -3,11 +3,8 @@
 from collections import UserDict
 from datetime import datetime, timedelta, date
 import re
-
-
-class ValidationError(Exception):
-    """Custom exception for validation errors."""
-
+from storage import load, save
+from exceptions import ValidationError
 
 class Field:
     """Base class for all fields."""
@@ -34,9 +31,7 @@ class Name(Field):
     def __init__(self, value: str):
         if not value or not isinstance(value, str):
             raise ValidationError("Invalid name")
-        # Now name can not contain space-like characters
-        if any(char.isspace() for char in value):
-            raise ValidationError("Name cannot contain spaces")
+
         super().__init__(value)
 
 
@@ -269,6 +264,17 @@ class Record:
 
 class AddressBook(UserDict):
     """Represents the address book."""
+
+    FILENAME = "addressbook.pkl"
+
+    @staticmethod
+    def load() -> 'AddressBook':
+        """Load address book from storage."""
+        return load(AddressBook.FILENAME, default_factory=AddressBook)
+
+    def save(self):
+        """Save address book to storage."""
+        save(self, AddressBook.FILENAME)
 
     def add_record(self, record: Record) -> None:
         """

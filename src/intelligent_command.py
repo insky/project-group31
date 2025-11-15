@@ -1,8 +1,11 @@
 """Module for suggesting correct commands based on single-edit variants."""
 
-from handlers import book_commands, note_commands, commands
+from handlers_address_book import commands as address_book_commands
+from handlers_note_book import commands as note_book_commands
+from handlers_common import commands as common_commands
 
-ALL_COMMANDS = set(book_commands.keys()) | set(note_commands.keys() | set(commands.keys()))
+COMMANDS = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
+COMMAND_VARIANTS_CACHE = None
 
 def variants(word):
     """
@@ -24,38 +27,59 @@ def variants(word):
     return set(deletes + transposes + replaces + inserts)
 
 
-def command_variants() -> dict[str, set[str]]:
+def distance(s1, s2):
+    """
+    Computes the distance between two strings.
+
+    Args:
+        s1 (str): The first string.
+        s2 (str): The second string.
+
+    Returns:
+        int: The distance.
+    """
+    return abs(len(s1) - len(s2))
+
+def command_variants():
     """
     Generates a mapping of commands to their single-edit variants.
 
     Returns:
-        dict[str, set[str]]: Mapping of command to its variants.
+        dict_items[str, set[str]]: Mapping of command to its variants.
     """
-    variant_map = {}
-    for command in ALL_COMMANDS:
-        variant_map[command] = variants(command)
+    global COMMAND_VARIANTS_CACHE
 
-    return variant_map
+    if COMMAND_VARIANTS_CACHE is None:
+        variant_map = {}
+        for command in COMMANDS:
+            variant_map[command] = variants(command)
+
+        COMMAND_VARIANTS_CACHE = variant_map.items()
+
+    return COMMAND_VARIANTS_CACHE
 
 
 def suggest_command(misspelled: str) -> str | None:
     """
-    Suggest the canonical command for a misspelled input.
+    Suggest canonical commands for a misspelled input.
 
     Args:
         misspelled (str): The potentially misspelled command.
 
     Returns:
-        str | None: The matching command name, or None if no match.
+        str | None: The matching command name or None if no match.
     """
+
     lower_misspelled = misspelled.lower()
 
-    if lower_misspelled in ALL_COMMANDS:
+    if lower_misspelled in COMMANDS:
         return lower_misspelled
 
-    variants_map = command_variants()
-    for command, variants_set in variants_map.items():
-        if any(lower_misspelled.startswith(variant) for variant in variants_set):
-            return command
+    possible_matches = []
+    for command, variants_set in command_variants():
+        if any(lower_misspelled == variant for variant in variants_set):
+            possible_matches.append(command)
 
-    return None
+    possible_matches.sort(key=lambda cmd: distance(lower_misspelled, cmd))
+
+    return possible_matches[0] if possible_matches else None
