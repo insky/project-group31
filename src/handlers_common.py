@@ -44,7 +44,7 @@ def handle_help(_a, _n):
     add-note <text> [--tags tag1 [tag2 [...]]] - Adds new note
     all-notes - Returns all notes information
     find-tag <tag> - Finds a note by tag
-    sort-notes - Sortes notes by their tags in alphabetic order
+    search-note <text> - Finds a note by text content
     update-note <id> <new text> - Edit note text
     delete-note <id> - Delete note
     add-tag <id> <tag1> [<tag2> [...]] - Add tags to a note
