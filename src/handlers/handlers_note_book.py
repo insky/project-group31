@@ -1,7 +1,7 @@
 """Handlers for user commands."""
 
-from note_book import NoteBook, Note
-from utils import input_error
+from src.models.note_book import NoteBook, Note
+from src.utils import input_error
 
 
 @input_error('Note')

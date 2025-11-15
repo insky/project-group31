@@ -1,8 +1,8 @@
 """Module for suggesting correct commands based on single-edit variants."""
 
-from handlers_address_book import commands as address_book_commands
-from handlers_note_book import commands as note_book_commands
-from handlers_common import commands as common_commands
+from src.handlers.handlers_address_book import commands as address_book_commands
+from src.handlers.handlers_note_book import commands as note_book_commands
+from src.handlers.handlers_common import commands as common_commands
 
 COMMANDS = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
 COMMAND_VARIANTS_CACHE = None
