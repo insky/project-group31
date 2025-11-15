@@ -5,14 +5,15 @@ from utils import input_error
 
 
 @input_error('Contact')
-def handle_add(book: AddressBook, name: str, phone: str, email: str | None = None):
+def handle_add_contact(book: AddressBook, name: str, phone: str | None, email: str | None = None):
     """
     Adds a new contact or update existing contact's phone number.
 
     Args:
         book (AddressBook): The address book.
         name (str): The contact name.
-        phone (str): The phone number.
+        phone (str | None): The phone number.
+        email (str | None): The email address.
 
     Returns:
         str: The result message.
@@ -24,15 +25,15 @@ def handle_add(book: AddressBook, name: str, phone: str, email: str | None = Non
         record = Record(name)
         book.add_record(record)
         message = "Contact added"
-
-    record.add_phone(phone)
+    if phone:
+        record.add_phone(phone)
     if email:
         record.add_email(email)
     return message
 
 
 @input_error('Contact')
-def handle_change(book: AddressBook, name: str, old_phone: str, new_phone: str):
+def handle_change_contact(book: AddressBook, name: str, old_phone: str, new_phone: str):
     """
     Changes an existing contact's phone number.
 
@@ -53,7 +54,7 @@ def handle_change(book: AddressBook, name: str, old_phone: str, new_phone: str):
 @input_error('Contact')
 def handle_phone(book: AddressBook, name: str):
     """
-    Gets the phone number of a contact.
+    Gets the phone numbers of a contact.
 
     Args:
         book (AddressBook): The address book.
@@ -77,9 +78,6 @@ def handle_all(book: AddressBook):
     Returns:
         str: The list of contacts or message if none.
     """
-    if not book.data:
-        return "No contacts found"
-
     return str(book)
 
 
@@ -252,10 +250,10 @@ def handle_delete(book: AddressBook, name: str):
 
 
 commands: dict = {
-    'add': handle_add,
-    'change': handle_change,
-    'phone': handle_phone,
-    'all': handle_all,
+    'add-contact': handle_add_contact,
+    'change-contact': handle_change_contact,
+    'show-phone': handle_phone,
+    'all-contacts': handle_all,
     'add-birthday': handle_add_birthday,
     'show-birthday': handle_show_birthday,
     'update-birthday': handle_update_birthday,

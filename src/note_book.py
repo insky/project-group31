@@ -20,6 +20,9 @@ class Note:
                 f"text={self.text}, "
                 f"tags={self.sorted_tags} ")
 
+    def __str__(self) -> str:
+        return f"id: {self.id}; text: {self.text}; tags: {self.sorted_tags}"
+
     def add_tags(self, tags: set[str]):
         """Add tags to the note."""
         self.tags.update(tags)
@@ -48,7 +51,7 @@ class Note:
     @property
     def sorted_tags(self) -> str:
         """Return tags sorted in alphabetical order as a string."""
-        return ' '.join(sorted(self.tags))
+        return ', '.join(sorted(self.tags))
 
 
 class NoteBook(UserDict[int, Note]):
@@ -123,3 +126,12 @@ class NoteBook(UserDict[int, Note]):
             self.data.values(),
             key=lambda note: (note.sorted_tags)
         )
+
+    def __str__(self):
+        if not self.data:
+            return "Note book is empty."
+
+        output = []
+        for record in self.data.values():
+            output.append(str(record))
+        return '\n  '.join(output)

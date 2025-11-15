@@ -18,7 +18,7 @@ from address_book import (
 )
 from handlers_common import handle_hello, handle_help, handle_exit
 from handlers_address_book import (
-    handle_add, handle_change, handle_phone, handle_all,
+    handle_add_contact, handle_change_contact, handle_phone, handle_all,
     handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays,
 )
 from handlers_note_book import (
@@ -581,35 +581,35 @@ class TestHandlers(TestCaseWithMockDatetime):
 
     def test_handle_add_new_contact(self):
         """Test adding new contact."""
-        result = handle_add(self.book, "Jane", "0987654321", "jane@example.com")
+        result = handle_add_contact(self.book, "Jane", "0987654321", "jane@example.com")
         self.assertEqual(result, "Contact added")
         self.assertIn("Jane", self.book.data)
 
     def test_handle_add_existing_contact(self):
         """Test adding phone to existing contact."""
-        result = handle_add(self.book, "John", "0987654321", "john@example.com")
+        result = handle_add_contact(self.book, "John", "0987654321", "john@example.com")
         self.assertEqual(result, "Contact updated")
         self.assertEqual(len(self.book.data["John"].phones), 2)
 
     def test_handle_add_invalid_phone(self):
         """Test adding contact with invalid phone."""
-        result = handle_add(self.book, "Jones", "invalid", "jones@example.com")
+        result = handle_add_contact(self.book, "Jones", "invalid", "jones@example.com")
         self.assertEqual(result, "Invalid phone number")
 
     def test_handle_change_valid(self):
         """Test changing phone number."""
-        result = handle_change(self.book, "John", "1234567890", "0987654321")
+        result = handle_change_contact(self.book, "John", "1234567890", "0987654321")
         self.assertEqual(result, "Contact updated")
         self.assertIn(Phone("0987654321"), self.book.data["John"].phones)
 
     def test_handle_change_contact_not_found(self):
         """Test changing phone for non-existent contact."""
-        result = handle_change(self.book, "Non Existent", "1234567890", "0987654321")
+        result = handle_change_contact(self.book, "Non Existent", "1234567890", "0987654321")
         self.assertEqual(result, "Contact not found")
 
     def test_handle_change_phone_not_found(self):
         """Test changing non-existent phone."""
-        result = handle_change(self.book, "John", "0987654321", "1111111111")
+        result = handle_change_contact(self.book, "John", "0987654321", "1111111111")
         self.assertEqual(result, "Old phone number not found")
 
     def test_handle_phone_existing_contact(self):
@@ -631,7 +631,7 @@ class TestHandlers(TestCaseWithMockDatetime):
         """Test listing all contacts when book is empty."""
         empty_book = AddressBook()
         result = handle_all(empty_book)
-        self.assertEqual(result, "No contacts found")
+        self.assertEqual(result, "Address book is empty.")
 
     def test_handle_add_birthday_valid(self):
         """Test adding birthday to existing contact."""
@@ -699,7 +699,7 @@ class TestHandlers(TestCaseWithMockDatetime):
             "#urgent",
         )
 
-        self.assertIn("Note added with id", result)
+        self.assertIn("Note added: id: 2; text: Prepare for blackouts; tags: home, urgent", result)
         self.assertIn("Prepare for blackouts", result)
         self.assertIn("home", result)
         self.assertIn("urgent", result)
@@ -709,13 +709,13 @@ class TestHandlers(TestCaseWithMockDatetime):
         """Test add-note handler without tags."""
         result = handle_add_note(self.notes, "Yoga session")
 
-        self.assertIn("Note added with id", result)
+        self.assertIn("Note added: id: 3; text: Yoga session; tags: ", result)
         self.assertIn("Yoga session", result)
 
     def test_handle_all_notes_no_notes(self):
         """Test all-notes handler when there are no notes."""
         result = handle_all_notes(self.notes)
-        self.assertEqual(result, "No notes found.")
+        self.assertEqual(result, "Note book is empty.")
 
     def test_handle_all_notes_lists_existing_notes(self):
         """Test all-notes handler lists all existing notes."""
@@ -731,7 +731,7 @@ class TestHandlers(TestCaseWithMockDatetime):
         self.assertIn("self-care", result)
 
     def test_add_note_with_tag_alias_and_find(self):
-        """Test that add-note works with --tag alias and find-note-tag finds it."""
+        """Test that add-note works with --tag alias and find-tag finds it."""
         handle_add_note(self.notes,
                         "Test note",
                         "--tags",
