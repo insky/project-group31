@@ -78,9 +78,6 @@ def handle_all(book: AddressBook):
     Returns:
         str: The list of contacts or message if none.
     """
-    if not book.data:
-        return "No contacts found"
-
     return str(book)
 
 

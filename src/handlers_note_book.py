@@ -37,8 +37,7 @@ def handle_add_note(notes: NoteBook, *args: str) -> str:
 
     notes.add_note(note)
 
-    tags_str = f" tags={sorted(tags)}" if tags else ""
-    return f"Note added with id {note.id}.{tags_str}. {note.text}"
+    return f"Note added: {note}"
 
 
 @input_error('Note')
@@ -52,20 +51,7 @@ def handle_all_notes(notes: NoteBook):
     Returns:
         str: The list of notes or message if none.
     """
-    if not notes.data:
-        return "No notes found."
-
-    try:
-        all_notes = notes.list_notes()
-    except AttributeError:
-        all_notes = list(notes.data.values())
-
-    lines: list[str] = []
-    for idx, note in enumerate(all_notes, start=1):
-        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
-        lines.append(f"{idx}. (id={note.id}) [{tags_str}] {note.text}")
-
-    return "\n".join(lines)
+    return str(notes)
 
 
 @input_error('Note')
@@ -80,7 +66,7 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
     Returns:
         str: The list of notes with this tag or a message if none.
     """
-    normalized = tag.lstrip("#").strip().lower()
+    normalized = tag.strip().lstrip("#").lower()
     if not normalized:
         return "Please provide a non-empty tag."
 
@@ -89,12 +75,11 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
     if not result:
         return f'No notes found for tag "{normalized}".'
 
-    lines: list[str] = []
+    lines = []
     for note in result:
-        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
-        lines.append(f"(id={note.id}) [{tags_str}] {note.text}")
+        lines.append(str(note))
 
-    return "\n".join(lines)
+    return "\n- ".join(lines)
 
 
 @input_error('Note')
@@ -115,10 +100,9 @@ def handle_sort_notes_by_tags(notes: NoteBook) -> str:
 
     lines = []
     for note in sorted_notes:
-        tags_str = ", ".join(sorted(note.tags)) if note.tags else "-"
-        lines.append(f"(id={note.id}) [{tags_str}] {note.text}")
+        lines.append(str(note))
 
-    return "\n".join(lines)
+    return "\n- ".join(lines)
 
 
 @input_error('Note')
@@ -142,7 +126,7 @@ def handle_update_note(notes: NoteBook, note_id: str, *new_text_parts: str) -> s
         return "New text cannot be empty."
 
     note = notes.edit_note_text(int(note_id), new_text)
-    return f"Note {note_id} updated: {note.text}"
+    return f"Note {note_id} updated: {note}"
 
 
 @input_error('Note')
@@ -182,7 +166,7 @@ def handle_add_tag(notes: NoteBook, note_id: str, *tags: str) -> str:
 
     note.add_tags(cleaned)
 
-    return f"Tags added to note {note_id}: {sorted(cleaned)}"
+    return f"Tags added to note {note_id}: {note.sorted_tags}"
 
 @input_error('Note')
 def handle_delete_tag(notes: NoteBook, note_id: str, tag: str) -> str:
@@ -215,7 +199,7 @@ def handle_update_tag(notes: NoteBook, note_id: str, old_tag: str, new_tag: str)
 commands: dict = {
     'add-note': handle_add_note,
     'all-notes': handle_all_notes,
-    'find-note-tag': handle_find_note_by_tag,
+    'find-tag': handle_find_note_by_tag,
     'sort-notes': handle_sort_notes_by_tags,
     'update-note': handle_update_note,
     'delete-note': handle_delete_note,
