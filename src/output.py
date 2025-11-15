@@ -26,7 +26,6 @@ def simple_messege(messege:str):
     rich.print(f'[bold white]{messege}[/]')
 
 def Table_message(info:str):
-    print(info)
     splited_info = re.split(r'[\n]', info)
     for line in splited_info:
         splited_line = re.split(r'[;]', line)
@@ -55,6 +54,7 @@ def asking(text:str):
     theme = Prompt.ask(f'[bold white]{text}[/]')
     return theme
     
+
 
 
 
