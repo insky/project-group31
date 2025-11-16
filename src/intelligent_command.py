@@ -59,7 +59,7 @@ def command_variants():
     return COMMAND_VARIANTS_CACHE
 
 
-def suggest_command(misspelled: str) -> str | None:
+def suggest_command(misspelled: str) -> list[str]:
     """
     Suggest canonical commands for a misspelled input.
 
@@ -73,7 +73,7 @@ def suggest_command(misspelled: str) -> str | None:
     lower_misspelled = misspelled.lower()
 
     if lower_misspelled in COMMANDS:
-        return lower_misspelled
+        return [lower_misspelled]
 
     possible_matches = []
     for command, variants_set in command_variants():
@@ -82,4 +82,4 @@ def suggest_command(misspelled: str) -> str | None:
 
     possible_matches.sort(key=lambda cmd: distance(lower_misspelled, cmd))
 
-    return possible_matches[0] if possible_matches else None
+    return possible_matches
