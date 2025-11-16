@@ -1,7 +1,12 @@
 # project-group31
 
 ## Installation
-No installation required. Clone the repository to your local machine.
+Clone the repository to your local machine.
+
+Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 Run the main script to start the assistant bot:

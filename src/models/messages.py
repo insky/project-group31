@@ -1,0 +1,54 @@
+"""Models for different message types."""
+from typing import Any, Dict, List
+from rich.table import Table
+from rich import box, print as rich_print
+
+
+class Message:
+    """Base class for messages."""
+    def __init__(self, data) -> None:
+        self.data = data
+
+    def print(self) -> None:
+        """Print the message data."""
+        rich_print(self.data)
+
+
+class ErrorMessage(Message):
+    """Message class for rendering errors."""
+    def __init__(self, text: str) -> None:
+        super().__init__(f'[red]{text}[/]')
+
+
+class TableMessage(Message):
+    """Message class for rendering tables."""
+    def __init__(self, data: List[Dict[str, Any]]) -> None:
+        super().__init__(self._dict_table(data))
+
+    def _ordered_columns(self, records: List[Dict[str, Any]]) -> List[str]:
+        """Return columns preserving the order of first appearance across records."""
+        seen: List[str] = []
+        for record in records:
+            for key in record:
+                if key not in seen:
+                    seen.append(key)
+        return seen
+
+    def _dict_table(self, records: List[Dict[str, Any]]) -> Table:
+        """Render a Rich table for arbitrary dictionaries using their keys as columns."""
+        if not records:
+            return Table()
+
+        columns = self._ordered_columns(records)
+
+        table = Table(box=box.SQUARE, border_style="#222222")
+        for column in columns:
+            table.add_column(column, overflow="fold")
+        for column in columns:
+            table.add_column(column, overflow="fold")
+
+        for record in records:
+            row = [str(record.get(column, "")) for column in columns]
+            table.add_row(*row)
+
+        return table
