@@ -162,6 +162,16 @@ class Record:
         address_str = self.address.value if self.address else 'N/A'
         return f"name: {name_str}; phones: {phones_str}; birthday: {birthday_str}; email: {email_str}; address: {address_str}"
 
+    def to_dict(self):
+        """Convert record to dictionary for table display."""
+        return {
+            "name": self.name.value,
+            "phones": ', '.join(p.value for p in self.phones),
+            "birthday": str(self.birthday) if self.birthday else 'N/A',
+            "email": self.email.value if self.email else 'N/A',
+            "address": self.address.value if self.address else 'N/A'
+        }
+
     def add_email(self, email: str) -> None:
         """
         Adds an email to the contact or updates the existing one.
@@ -371,7 +381,7 @@ class AddressBook(UserDict):
                 upcoming_birthdays.append({
                     "name": record.name,
                     "birthday": record.birthday,
-                    "congratulation_day": congratulation_day
+                    "congratulation_day": congratulation_day.strftime("%d.%m.%Y")
                 })
 
         return upcoming_birthdays
@@ -399,11 +409,7 @@ class AddressBook(UserDict):
         results.update(self.find_by_address(query))
         return list(results)
 
-    def __str__(self):
-        if not self.data:
-            return "Address book is empty."
 
-        output = []
-        for record in self.data.values():
-            output.append(str(record))
-        return '\n  '.join(output)
+    def to_list_of_dict(self):
+        """Convert all records to list of dictionaries for table display."""
+        return [record.to_dict() for record in self.data.values()]

@@ -30,11 +30,11 @@ CONTACTS_DATA: list[dict[str, Sequence[str] | str]] = [
         "address": "8 Harbor Road, Lakeside",
     },
     {
-        "name": "Dmitri Petrov",
+        "name": "Bill Gates",
         "phones": ["5551230004"],
         "birthday": "09.01.1988",
-        "email": "d.petrov@example.com",
-        "address": "55 Tverskaya Street, Moscow",
+        "email": "bill.gates@example.com",
+        "address": "55 Microsoft Way, Redmond",
     },
     {
         "name": "Elena Rossi",

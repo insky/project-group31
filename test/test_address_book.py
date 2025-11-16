@@ -74,7 +74,7 @@ class TestAddressBook(TestCaseWithMockDatetime):
         upcoming = self.book.get_upcoming_birthdays(7)
         congratulation_date = upcoming[0]["congratulation_day"]
         # Should be moved to Monday (Oct 27)
-        self.assertEqual(congratulation_date, date(2025, 10, 27))
+        self.assertEqual(congratulation_date, '27.10.2025')
 
     def test_get_upcoming_birthdays_no_birthdays(self):
         """Test getting upcoming birthdays when none exist."""

@@ -8,6 +8,7 @@ from src.utils import parse_input, reconstruct_command
 from src.models.address_book import AddressBook
 from src.models.note_book import NoteBook
 from src.intelligent_command import suggest_command
+from src.models.messages import ErrorMessage
 
 def main():
     """Main function to run the assistant bot."""
@@ -26,28 +27,28 @@ def main():
         command, args = parse_input(user_input)
 
         if command is None:
-            print("- No command entered.")
+            ErrorMessage("- No command entered.").print()
             continue
 
         if command in commands_address_book:
             handler = commands_address_book[command]
             result = handler(address_book, *args)
-            print(f"- {result}")
+            result.print()
             continue
 
         if command in commands_note_book:
             handler = commands_note_book[command]
             result = handler(note_book, *args)
-            print(f"- {result}")
+            result.print()
             continue
 
         if command in commands_common:
             handler = commands_common[command]
             result = handler(address_book, note_book, *args)
-            print(f"- {result}")
+            result.print()
             continue
 
-        print(f"- Unknown command: {command}")
+        ErrorMessage(f"- Unknown command: {command}").print()
 
         suggestions = suggest_command(command)
         if suggestions:

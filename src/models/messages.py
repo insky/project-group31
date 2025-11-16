@@ -11,19 +11,33 @@ class Message:
 
     def print(self) -> None:
         """Print the message data."""
-        rich_print(self.data)
+        print(self.data)
+
+    @property
+    def raw(self) -> Any:
+        """Return the raw message data."""
+        return self.data
 
 
 class ErrorMessage(Message):
-    """Message class for rendering errors."""
-    def __init__(self, text: str) -> None:
-        super().__init__(f'[red]{text}[/]')
+    """Message class for rendering error messages."""
+    def print(self) -> None:
+        """Print the error message data using rich."""
+        rich_print(f'[red]{self.data}[/]')
+
+
+class SuccessMessage(Message):
+    """Message class for rendering success messages."""
+    def print(self) -> None:
+        """Print the success message data using rich."""
+        rich_print(f'[green]{self.data}[/]')
 
 
 class TableMessage(Message):
     """Message class for rendering tables."""
-    def __init__(self, data: List[Dict[str, Any]]) -> None:
-        super().__init__(self._dict_table(data))
+    def print(self) -> None:
+        """Print the error message data using rich."""
+        rich_print(self._dict_table(self.data))
 
     def _ordered_columns(self, records: List[Dict[str, Any]]) -> List[str]:
         """Return columns preserving the order of first appearance across records."""
@@ -43,9 +57,8 @@ class TableMessage(Message):
 
         table = Table(box=box.SQUARE, border_style="#222222")
         for column in columns:
-            table.add_column(column, overflow="fold")
-        for column in columns:
-            table.add_column(column, overflow="fold")
+            _column = column.replace("_", " ").capitalize()
+            table.add_column(_column, overflow="fold")
 
         for record in records:
             row = [str(record.get(column, "")) for column in columns]

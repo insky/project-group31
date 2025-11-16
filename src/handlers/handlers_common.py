@@ -1,6 +1,7 @@
 """Handlers for user commands."""
 
 import sys
+from src.models.messages import Message
 from src.utils import input_error
 
 @input_error()
@@ -11,7 +12,7 @@ def handle_hello(_a, _n):
     Returns:
         str: The greeting message.
     """
-    return "How can I help you?"
+    return Message("How can I help you?")
 
 
 @input_error()
@@ -23,7 +24,7 @@ def handle_help(_a, _n):
         str: The help text.
     """
 
-    return """Available commands:
+    return Message("""Available commands:
     hello - Greet the bot
     help - Show this help message
     exit | close - Exit the bot
@@ -49,7 +50,7 @@ def handle_help(_a, _n):
     delete-note <id> - Delete note
     add-tag <id> <tag1> [<tag2> [...]] - Add tags to a note
     delete-tag <id> <tag> - Remove tag from a note
-    update-tag <id> <old> <new> - Rename a tag in a note"""
+    update-tag <id> <old> <new> - Rename a tag in a note""")
 
 @input_error()
 def handle_exit(address_book, note_book):

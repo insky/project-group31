@@ -2,6 +2,7 @@
 
 import shlex
 from src.models.exceptions import ValidationError, NoteError
+from src.models.messages import ErrorMessage
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """
@@ -58,17 +59,17 @@ def input_error(item_name: str = "Item"):
             try:
                 return func(*args, **kwargs)
             except TypeError:
-                return "Invalid number of parameters"
+                return ErrorMessage("Invalid number of parameters")
             except ValueError:
-                return "Invalid input. Please enter the correct data"
+                return ErrorMessage("Invalid input. Please enter the correct data")
             except AttributeError:
-                return f"{item_name} not found"
+                return ErrorMessage(f"{item_name} not found")
             except KeyError:
-                return f"{item_name} not found"
+                return ErrorMessage(f"{item_name} not found")
             except ValidationError as ve:
-                return str(ve)
+                return ErrorMessage(str(ve))
             except NoteError as ne:
-                return str(ne)
+                return ErrorMessage(str(ne))
 
         return wrapper
     return decorator

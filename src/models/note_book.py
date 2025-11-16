@@ -23,6 +23,14 @@ class Note:
     def __str__(self) -> str:
         return f"id: {self.id}; text: {self.text}; tags: {self.sorted_tags}"
 
+    def to_dict(self):
+        """Convert note to dictionary for table display."""
+        return {
+            "id": self.id,
+            "text": self.text,
+            "tags": self.sorted_tags
+        }
+
     def add_tags(self, tags: set[str]):
         """Add tags to the note."""
         self.tags.update(tags)
@@ -136,17 +144,6 @@ class NoteBook(UserDict[int, Note]):
             key=lambda note: note.sorted_tags
         )
 
-    @staticmethod
-    def list_to_string(notes: list[Note], empty_string: str = "Note book is empty.") -> str:
-        """Return string representation of notes list."""
-        if not notes:
-            return empty_string
-
-        output = []
-        for record in notes:
-            output.append(str(record))
-        return '\n  '.join(output)
-
     def __str__(self):
         if not self.data:
             return "Note book is empty."
@@ -155,3 +152,11 @@ class NoteBook(UserDict[int, Note]):
         for record in self.data.values():
             output.append(str(record))
         return '\n  '.join(output)
+
+    def to_list_of_dict(self):
+        """Convert all notes to list of dictionaries for table display."""
+        all_notes = sorted(
+            self.data.values(),
+            key=lambda note: note.sorted_tags
+        )
+        return [note.to_dict() for note in all_notes]
