@@ -150,23 +150,24 @@ def handle_show_birthday(book: AddressBook, name: str):
 
 
 @input_error('Contact')
-def handle_upcoming_birthdays(book: AddressBook):
+def handle_upcoming_birthdays(book: AddressBook, days: str = '7'):
     """
     Shows contacts with upcoming birthdays.
 
     Args:
         book (AddressBook): The address book.
+        days (str): Number of days to look ahead for birthdays.
 
     Returns:
         str: The list of upcoming birthdays or message if none.
     """
-    upcoming = book.get_upcoming_birthdays()
+    upcoming = book.get_upcoming_birthdays(days_ahead=int(days))
     if not upcoming:
         return "No upcoming birthdays"
 
     result = []
     for item in upcoming:
-        result.append(f"{item['name']}: {item['congratulation_day'].strftime('%d.%m.%Y')}")
+        result.append(f"name: {item['name']}; birthday: {item['birthday']}; congratulation day: {item['congratulation_day'].strftime('%d.%m.%Y')}")
     return "\n".join(result)
 
 

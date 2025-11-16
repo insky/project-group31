@@ -370,6 +370,7 @@ class AddressBook(UserDict):
             if 0 <= (congratulation_day - today).days <= days_ahead:
                 upcoming_birthdays.append({
                     "name": record.name,
+                    "birthday": record.birthday,
                     "congratulation_day": congratulation_day
                 })
 
