@@ -1,6 +1,6 @@
 """Main module for the assistant bot."""
 
-#import readline#
+import readline
 from src.handlers.handlers_common import commands as commands_common, handle_exit 
 from src.handlers.handlers_address_book import commands as commands_address_book
 from src.handlers.handlers_note_book import commands as commands_note_book
