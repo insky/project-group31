@@ -1,7 +1,8 @@
 """Utility functions for the assistant bot."""
 
 import shlex
-from src.models.exceptions import ValidationError, NoteError
+from src.models.exceptions import ValidationError, NoteError 
+from output import error_output
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """
@@ -58,17 +59,17 @@ def input_error(item_name: str = "Item"):
             try:
                 return func(*args, **kwargs)
             except TypeError:
-                return "Invalid number of parameters"
+                error_output("Invalid number of parameters")
             except ValueError:
-                return "Invalid input. Please enter the correct data"
+                error_output("Invalid input. Please enter the correct data")
             except AttributeError:
-                return f"{item_name} not found"
+                error_output(f"{item_name} not found")
             except KeyError:
-                return f"{item_name} not found"
+                error_output(f"{item_name} not found")
             except ValidationError as ve:
-                return str(ve)
+                error_output(str(ve))
             except NoteError as ne:
-                return str(ne)
+                error_output(str(ne))
 
         return wrapper
     return decorator

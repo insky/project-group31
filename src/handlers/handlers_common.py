@@ -1,7 +1,8 @@
 """Handlers for user commands."""
 
 import sys
-from src.utils import input_error
+from src.utils import input_error 
+from src.output import simple_message
 
 @input_error()
 def handle_hello(_a, _n):
@@ -11,7 +12,7 @@ def handle_hello(_a, _n):
     Returns:
         str: The greeting message.
     """
-    return "How can I help you?"
+    simple_message("How can I help you?")
 
 
 @input_error()
@@ -23,9 +24,10 @@ def handle_help(_a, _n):
         str: The help text.
     """
 
-    return """Available commands:
+    line = """Available commands:
     hello - Greet the bot
     help - Show this help message
+    description <en>/<ua>- shows discription to this bot
     exit | close - Exit the bot
 
     add-contact <name> [<phone>] [<email>] - Add a new contact
@@ -50,6 +52,7 @@ def handle_help(_a, _n):
     add-tag <id> <tag1> [<tag2> [...]] - Add tags to a note
     delete-tag <id> <tag> - Remove tag from a note
     update-tag <id> <old> <new> - Rename a tag in a note"""
+    simple_message(line)
 
 @input_error()
 def handle_exit(address_book, note_book):
@@ -60,15 +63,39 @@ def handle_exit(address_book, note_book):
         address (AddressBook): The address book.
         notes (NoteBook): The notes book
     """
-    print("- Goodbye!")
+    simple_message("- Goodbye!")
     print()  # For a newline on exit
     address_book.save()
     note_book.save()
     sys.exit(0)
 
+@input_error
+def description(language:str='en'):
+
+    if language == 'en':
+        line = '''This small bot is basically apersonal data organizer.
+          It can store and edit basic information like your name, phone 
+          numbers, emails, address, and birthday.
+          You can also create simple notes, update them whenever you need, and 
+          keep everything in one place.
+          It’s nothing overly complicated — just a handy 
+          little tool to keep your personal info tidy.'''
+        
+    if language == 'ua':
+        line = '''Цей бот — невеликий особистий органайзер.
+            Він може зберігати та редагувати базову інформацію: ім’я, номери 
+            телефонів, електронні адреси, місце проживання та день народження.
+            Також можна створювати нотатки, змінювати їх у будь-який момент і 
+            тримати все впорядковано в одному місці.
+            Нічого надто складного — просто зручний інструмент, щоб 
+            не загубити важливі дрібниці.'''
+        
+        simple_message(line)
+
 commands: dict = {
     'hello': handle_hello,
     'help': handle_help,
+    'description': description,
     'close': handle_exit,
     'exit': handle_exit,
 }

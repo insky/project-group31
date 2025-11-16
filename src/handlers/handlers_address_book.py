@@ -1,7 +1,8 @@
 """Handlers for user commands."""
 
-from src.models.address_book import AddressBook, Record
-from src.utils import input_error
+from src.models.address_book import AddressBook, Record 
+from src.utils import input_error 
+from output import simple_message
 
 
 @input_error('Contact')
@@ -29,7 +30,7 @@ def handle_add_contact(book: AddressBook, name: str, phone: str | None, email: s
         record.add_phone(phone)
     if email:
         record.add_email(email)
-    return message
+    simple_message(message)
 
 
 @input_error('Contact')
@@ -48,7 +49,7 @@ def handle_change_contact(book: AddressBook, name: str, old_phone: str, new_phon
     """
     record = book.find(name)
     record.edit_phone(old_phone, new_phone)  # type: ignore
-    return "Contact updated"
+    simple_message("Contact updated")
 
 
 @input_error('Contact')
@@ -64,7 +65,7 @@ def handle_phone(book: AddressBook, name: str):
         str: The phone numbers or error message.
     """
     record = book.find(name)
-    return f"{name}: {', '.join(phone.value for phone in record.phones)}"  # type: ignore
+    simple_message(f"{name}: {', '.join(phone.value for phone in record.phones)}")  # type: ignore
 
 
 @input_error('Contact')
@@ -100,7 +101,7 @@ def handle_search(book: AddressBook, query: str) -> str:
         for record in records:
             output.append(str(record))
         return '\n- '.join(output)
-    return f'No contact found for "{query}"'
+    simple_message(f'No contact found for "{query}"')
 
 
 @input_error('Contact')
@@ -118,13 +119,13 @@ def handle_add_birthday(book: AddressBook, name: str, birthday: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        simple_message("Contact not found")
 
     if record.birthday:
-        return "Birthday already set"
+        simple_message("Birthday already set")
 
     record.add_birthday(birthday)
-    return "Birthday added"
+    simple_message("Birthday added")
 
 
 @input_error('Contact')
@@ -141,12 +142,12 @@ def handle_show_birthday(book: AddressBook, name: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        simple_message("Contact not found")
 
     if record.birthday is None:
-        return "Birthday not set"
+        simple_message("Birthday not set")
 
-    return f"{name}'s birthday is {record.birthday}."  # type: ignore
+    simple_message(f"{name}'s birthday is {record.birthday}.") # type: ignore
 
 
 @input_error('Contact')
@@ -162,7 +163,7 @@ def handle_upcoming_birthdays(book: AddressBook):
     """
     upcoming = book.get_upcoming_birthdays()
     if not upcoming:
-        return "No upcoming birthdays"
+        simple_message("No upcoming birthdays")
 
     result = []
     for item in upcoming:
@@ -186,8 +187,8 @@ def handle_update_birthday(book: AddressBook, name: str, birthday: str):
     record = book.find(name)
     if record:
         record.add_birthday(birthday)
-        return 'Birthday updated'
-    return 'Contact not found'
+        simple_message('Birthday updated')
+    simple_message('Contact not found')
 
 
 @input_error('Contact')
@@ -206,8 +207,8 @@ def handle_update_email(book: AddressBook, name: str, email: str):
     record = book.find(name)
     if record:
         record.add_email(email)
-        return 'Email updated'
-    return 'Contact not found'
+        simple_message('Email updated')
+    simple_message('Contact not found')
 
 
 @input_error('Contact')
@@ -226,8 +227,8 @@ def handle_update_address(book: AddressBook, name: str, address: str):
     record = book.find(name)
     if record:
         record.add_address(address)
-        return 'Address updated'
-    return 'Contact not found'
+        simple_message('Address updated')
+    simple_message('Contact not found')
 
 
 @input_error('Contact')
@@ -245,8 +246,8 @@ def handle_delete(book: AddressBook, name: str):
     record = book.find(name)
     if record:
         book.delete(name)
-        return 'Contact deleted'
-    return 'Contact not found'
+        simple_message('Contact deleted')
+    simple_message('Contact not found')
 
 
 @input_error('Contact')
@@ -264,10 +265,10 @@ def handle_add_phone(book: AddressBook, name: str, phone: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        simple_message("Contact not found")
 
     record.add_phone(phone)
-    return "Phone added"
+    simple_message("Phone added")
 
 
 @input_error('Contact')
@@ -285,13 +286,13 @@ def handle_remove_phone(book: AddressBook, name: str, phone: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        simple_message("Contact not found")
 
     try:
         record.remove_phone(phone)
-        return "Phone removed"
+        simple_message("Phone removed")
     except KeyError:
-        return "Phone number not found"
+        simple_message("Phone number not found")
 
 
 commands: dict = {
