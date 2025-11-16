@@ -1,10 +1,14 @@
 from unittest.mock import patch
 from test.base import TestCaseWithMockDatetime
 
-from src.handlers.handlers_address_book import handle_add_contact, handle_change_contact, handle_phone, handle_all, \
+from src.handlers.handlers_address_book import (
+    handle_add_contact, handle_change_contact, handle_phone, handle_all,
     handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays
+)
 from src.handlers.handlers_common import handle_hello, handle_help, handle_exit
-from src.handlers.handlers_note_book import handle_add_note, handle_all_notes, handle_find_note_by_tag
+from src.handlers.handlers_note_book import (
+    handle_add_note, handle_all_notes, handle_find_note_by_tag
+)
 from src.models.address_book import AddressBook, Record, Phone
 from src.models.note_book import NoteBook, Note
 
@@ -54,7 +58,7 @@ class TestHandlers(TestCaseWithMockDatetime):
     def test_handle_add_invalid_phone(self):
         """Test adding contact with invalid phone."""
         result = handle_add_contact(self.book, "Jones", "invalid", "jones@example.com").raw
-        self.assertEqual(result, "Invalid phone number")
+        self.assertEqual(result, "Invalid phone number, must be 10 digits")
 
     def test_handle_change_valid(self):
         """Test changing phone number."""

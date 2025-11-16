@@ -106,7 +106,9 @@ class NoteBook(UserDict[int, Note]):
 
     def search_by_text(self, text: str):
         """Find all notes that contain specific text."""
-        return NoteBook.sort([note for note in self.data.values() if text.lower() in note.text.lower()])
+        return NoteBook.sort(
+            [note for note in self.data.values() if text.lower() in note.text.lower()]
+        )
 
     def edit_note_text(self, note_id: int, new_text: str):
         """Edit note text by id."""

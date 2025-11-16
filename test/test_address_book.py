@@ -2,10 +2,10 @@ import os
 import tempfile
 from datetime import date
 from unittest.mock import patch
+from test.base import TestCaseWithMockDatetime
 
 from src.models.address_book import AddressBook, Record, Phone
 from src.storage import save, load
-from test.base import TestCaseWithMockDatetime
 
 
 class TestAddressBook(TestCaseWithMockDatetime):

@@ -62,14 +62,10 @@ def input_error(item_name: str = "Item"):
                 return ErrorMessage("Invalid number of parameters")
             except ValueError:
                 return ErrorMessage("Invalid input. Please enter the correct data")
-            except AttributeError:
+            except (AttributeError, KeyError):
                 return ErrorMessage(f"{item_name} not found")
-            except KeyError:
-                return ErrorMessage(f"{item_name} not found")
-            except ValidationError as ve:
-                return ErrorMessage(str(ve))
-            except NoteError as ne:
-                return ErrorMessage(str(ne))
+            except (ValidationError, NoteError) as e:
+                return ErrorMessage(str(e))
 
         return wrapper
     return decorator

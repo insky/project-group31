@@ -29,8 +29,8 @@ def handle_help(_a, _n):
     help - Show this help message
     exit | close - Exit the bot
 
-    add-contact <name> [<phone>] [<email>] - Add a new contact
-    change-contact <name> <old_phone> <new_phone> - Change the phone number of a contact
+    add-contact <name> [<phone>] [<email>] - Add a new contact, phone 10 digits
+    change-contact <name> <old_phone> <new_phone> - Change the phone number of a contact, phone 10 digits
     show-phone <name> - Get the phone numbers of a contact
     all-contacts - List all contacts
     add-birthday <name> <birthday> - Add a birthday for a contact

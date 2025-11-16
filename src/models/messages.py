@@ -58,7 +58,8 @@ class TableMessage(Message):
         table = Table(box=box.SQUARE, border_style="#222222")
         for column in columns:
             _column = column.replace("_", " ").capitalize()
-            table.add_column(_column, overflow="fold")
+            justify = "right" if all(isinstance(record.get(column, ""), (int, float)) for record in records) else "left"
+            table.add_column(_column, overflow="fold", justify=justify)
 
         for record in records:
             row = [str(record.get(column, "")) for column in columns]

@@ -11,7 +11,9 @@ def handle_add_note(notes: NoteBook, *args: str) -> Message:
     add-note <text> [--tags tag1 [tag2 [...]]]
     """
     if not args:
-        return ErrorMessage("Please provide note text. Example: add-note \"Купити молоко\" --tags #home")
+        return ErrorMessage(
+            "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"
+        )
 
     if "--tags" in args:
         tag_index = args.index("--tags")
@@ -77,8 +79,8 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> Message:
 
     if result:
         return TableMessage([note.to_dict() for note in result])
-    else:
-        return ErrorMessage(f'No notes found for tag "{normalized}".')
+
+    return ErrorMessage(f'No notes found for tag "{normalized}".')
 
 
 @input_error('Note')
@@ -101,8 +103,8 @@ def handle_search_note(notes: NoteBook, *args: str) -> Message:
 
     if result:
         return TableMessage([note.to_dict() for note in result])
-    else:
-        return ErrorMessage(f'No notes found containing "{normalized}".')
+
+    return ErrorMessage(f'No notes found containing "{normalized}".')
 
 
 @input_error('Note')
