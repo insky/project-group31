@@ -2,7 +2,7 @@
 
 from src.models.address_book import AddressBook, Record 
 from src.utils import input_error 
-from output import simple_message
+from src.output import simple_message
 
 
 @input_error('Contact')

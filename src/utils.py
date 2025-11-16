@@ -2,7 +2,7 @@
 
 import shlex
 from src.models.exceptions import ValidationError, NoteError 
-from output import error_output
+from src.output import error_output
 
 def parse_input(user_input: str) -> tuple[str | None, list[str]]:
     """
