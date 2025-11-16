@@ -2,7 +2,7 @@
 
 from time import perf_counter
 
-from intelligent_command import suggest_command
+from src.intelligent_command import suggest_command
 
 def benchmark_suggest_command(iterations: int = 1000) -> float:
     """Measure the average execution time per suggest_command invocation."""
