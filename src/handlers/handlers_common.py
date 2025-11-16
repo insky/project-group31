@@ -35,7 +35,7 @@ def handle_help(_a, _n):
     add-birthday <name> <birthday> - Add a birthday for a contact
     show-birthday <name> - Show the birthday of a contact
     update-birthday <name> <birthday> - Updates birthday for a contact
-    birthdays - Show upcoming birthdays in the next week
+    birthdays [<days>] - Show upcoming birthdays in the next week or specified days
     search-contact <query> - Show records that match query by either name, phone, email, or address
     delete-contact <name> - Delete contact by name
     update-email <name> <email> - Updates email for a contact
