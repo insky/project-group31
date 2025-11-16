@@ -190,7 +190,7 @@ def handle_update_tag(notes: NoteBook, note_id: str, old_tag: str, new_tag: str)
 commands: dict = {
     'add-note': handle_add_note,
     'all-notes': handle_all_notes,
-    'find-tag': handle_find_note_by_tag,
+    'search-tag': handle_find_note_by_tag,
     'search-note': handle_search_note,
     'update-note': handle_update_note,
     'delete-note': handle_delete_note,
