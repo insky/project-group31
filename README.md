@@ -9,8 +9,18 @@ Run the main script to start the assistant bot:
 python3 -m src.main
 ```
 
+## Features
+- Chat-based assistant bot.
+- Command suggestion based on user input.
+- Command history and autocompletion.
+
 ## Tests
 To run the tests, use the following command:
 ```bash
 python3 -m unittest
+```
+## Benchmarks
+To run the benchmarks, use the following command:
+```bash
+python3 -m src.benchmark_suggest_command
 ```
