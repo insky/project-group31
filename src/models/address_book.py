@@ -179,6 +179,15 @@ class Record:
             "address": self.address.value if self.address else 'N/A'
         }
 
+    def edit_name(self, new_name: str) -> None:
+        """
+        Edits the contact's name.
+
+        Args:
+            new_name (str): The new name for the contact.
+        """
+        self.name = Name(new_name)
+
     def add_email(self, email: str) -> None:
         """
         Adds an email to the contact or updates the existing one.
@@ -301,6 +310,18 @@ class AddressBook(UserDict):
             record (Record): The record to add.
         """
         self.data[record.name.value] = record
+
+    def rename_record(self, old_name: str, new_name: str) -> None:
+        """
+        Renames a record in the address book.
+
+        Args:
+            old_name (str): The current name of the record.
+            new_name (str): The new name for the record.
+        """
+        record = self.data.pop(old_name)
+        record.edit_name(new_name)
+        self.data[new_name] = record
 
     def find(self, name: str) -> Record | None:
         """

@@ -143,3 +143,10 @@ class TestAddressBook(TestCaseWithMockDatetime):
         finally:
             if os.path.exists(temp_filename):
                 os.unlink(temp_filename)
+
+    def test_rename_record(self):
+        """Test renaming a record."""
+        self.book.add_record(self.record1)
+        self.book.rename_record("John", "Johnny")
+        self.assertIn("Johnny", self.book.data)
+        self.assertNotIn("John", self.book.data)

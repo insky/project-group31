@@ -2,7 +2,7 @@ from unittest.mock import patch
 from test.base import TestCaseWithMockDatetime
 
 from src.handlers.handlers_address_book import (
-    handle_add_contact, handle_change_contact, handle_phone, handle_all,
+    handle_add_contact, handle_change_contact_phone, handle_phone, handle_all,
     handle_add_birthday, handle_show_birthday, handle_upcoming_birthdays
 )
 from src.handlers.handlers_common import handle_hello, handle_help, handle_exit
@@ -62,18 +62,18 @@ class TestHandlers(TestCaseWithMockDatetime):
 
     def test_handle_change_valid(self):
         """Test changing phone number."""
-        result = handle_change_contact(self.book, "John", "1234567890", "0987654321").raw
+        result = handle_change_contact_phone(self.book, "John", "1234567890", "0987654321").raw
         self.assertEqual(result, "Contact updated")
         self.assertIn(Phone("0987654321"), self.book.data["John"].phones)
 
-    def test_handle_change_contact_not_found(self):
+    def test_handle_change_contact_phone_not_found(self):
         """Test changing phone for non-existent contact."""
-        result = handle_change_contact(self.book, "Non Existent", "1234567890", "0987654321").raw
+        result = handle_change_contact_phone(self.book, "Non Existent", "1234567890", "0987654321").raw
         self.assertEqual(result, "Contact not found")
 
     def test_handle_change_phone_not_found(self):
         """Test changing non-existent phone."""
-        result = handle_change_contact(self.book, "John", "0987654321", "1111111111").raw
+        result = handle_change_contact_phone(self.book, "John", "0987654321", "1111111111").raw
         self.assertEqual(result, "Old phone number not found")
 
     def test_handle_phone_existing_contact(self):

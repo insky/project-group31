@@ -34,7 +34,25 @@ def handle_add_contact(book: AddressBook, name: str, phone: str | None, email: s
 
 
 @input_error('Contact')
-def handle_change_contact(book: AddressBook, name: str, old_phone: str, new_phone: str):
+def handle_change_contact_name(book: AddressBook, old_name: str, new_name: str):
+    """
+    Changes an existing contact's name.
+
+    Args:
+        book (AddressBook): The address book.
+        old_name (str): The old contact name.
+        new_name (str): The new contact name.
+
+    Returns:
+        str: The result message.
+    """
+    book.rename_record(old_name, new_name)
+
+    return SuccessMessage("Contact updated")
+
+
+@input_error('Contact')
+def handle_change_contact_phone(book: AddressBook, name: str, old_phone: str, new_phone: str):
     """
     Changes an existing contact's phone number.
 
@@ -295,7 +313,8 @@ def handle_remove_phone(book: AddressBook, name: str, phone: str):
 
 commands: dict = {
     'add-contact': handle_add_contact,
-    'change-contact': handle_change_contact,
+    'change-name': handle_change_contact_name,
+    'change-phone': handle_change_contact_phone,
     'show-phone': handle_phone,
     'add-phone': handle_add_phone,
     'remove-phone': handle_remove_phone,
