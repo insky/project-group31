@@ -30,7 +30,7 @@ def handle_add_contact(book: AddressBook, name: str, phone: str | None, email: s
         record.add_phone(phone)
     if email:
         record.add_email(email)
-    simple_message(message)
+    return message
 
 
 @input_error('Contact')
