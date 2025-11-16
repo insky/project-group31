@@ -4,8 +4,8 @@ from src.handlers.handlers_address_book import commands as address_book_commands
 from src.handlers.handlers_note_book import commands as note_book_commands
 from src.handlers.handlers_common import commands as common_commands
 
-COMMANDS = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
-COMMAND_VARIANTS_CACHE = None
+all_commands = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
+command_variants_cache = {}
 
 def variants(word):
     """
@@ -47,16 +47,11 @@ def command_variants():
     Returns:
         dict_items[str, set[str]]: Mapping of command to its variants.
     """
-    global COMMAND_VARIANTS_CACHE
+    variant_map = {}
+    for command in all_commands:
+        variant_map[command] = variants(command)
 
-    if COMMAND_VARIANTS_CACHE is None:
-        variant_map = {}
-        for command in COMMANDS:
-            variant_map[command] = variants(command)
-
-        COMMAND_VARIANTS_CACHE = variant_map.items()
-
-    return COMMAND_VARIANTS_CACHE
+    return variant_map.items()
 
 
 def suggest_command(misspelled: str) -> list[str]:
@@ -72,14 +67,17 @@ def suggest_command(misspelled: str) -> list[str]:
 
     lower_misspelled = misspelled.lower()
 
-    if lower_misspelled in COMMANDS:
+    if lower_misspelled in all_commands:
         return [lower_misspelled]
 
     possible_matches = []
-    for command, variants_set in command_variants():
+    for command, variants_set in command_variants_cache:
         if any(lower_misspelled == variant for variant in variants_set):
             possible_matches.append(command)
 
     possible_matches.sort(key=lambda cmd: distance(lower_misspelled, cmd))
 
     return possible_matches
+
+# Fill the command variants cache
+command_variants_cache = command_variants()

@@ -1,7 +1,12 @@
 # project-group31
 
 ## Installation
-No installation required. Clone the repository to your local machine.
+Clone the repository to your local machine.
+
+Install the required dependencies:
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 Run the main script to start the assistant bot:
@@ -11,8 +16,19 @@ python3 -m src.main
 
 ## Features
 - Chat-based assistant bot.
+- Address book management with birthday reminders.
+- Phone number validation (10 digits).
+- Email validation.
+- Birthday management and upcoming birthday notifications.
+- Note-taking with tagging functionality.
 - Command suggestion based on user input.
 - Command history and autocompletion.
+
+## Data Seeding
+To seed the application with initial data, run:
+```bash
+python3 -m src.data_seed
+```
 
 ## Tests
 To run the tests, use the following command:

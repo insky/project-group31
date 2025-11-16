@@ -1,8 +1,9 @@
 from datetime import date
 
+from test.base import TestCaseWithMockDatetime
+
 from src.models.address_book import Record, Phone
 from src.models.exceptions import ValidationError
-from test.base import TestCaseWithMockDatetime
 
 
 class TestRecord(TestCaseWithMockDatetime):
@@ -22,8 +23,8 @@ class TestRecord(TestCaseWithMockDatetime):
         record.add_birthday("15.08.1990")
         record.add_address("Silly")
 
-        expected = "name: John; phones: 1234567890; birthday: 15.08.1990; email: N/A; address: Silly"
-        self.assertEqual(str(record), expected)
+        exp = "name: John; phones: 1234567890; birthday: 15.08.1990; email: N/A; address: Silly"
+        self.assertEqual(str(record), exp)
 
     def test_record_str_no_birthday(self):
         """Test Record string representation without birthday."""

@@ -25,6 +25,7 @@ class Field:
         return hash(self.value)
 
 
+# pylint: disable=too-few-public-methods
 class Name(Field):
     """Represents a contact's name."""
 
@@ -40,7 +41,7 @@ class Phone(Field):
 
     def __init__(self, value: str):
         if not value.isdigit() or len(value) != 10:
-            raise ValidationError("Invalid phone number")
+            raise ValidationError("Invalid phone number, must be 10 digits")
         super().__init__(value)
 
 
@@ -160,7 +161,32 @@ class Record:
         birthday_str = str(self.birthday) if self.birthday else 'N/A'
         email_str = self.email.value if self.email else 'N/A'
         address_str = self.address.value if self.address else 'N/A'
-        return f"name: {name_str}; phones: {phones_str}; birthday: {birthday_str}; email: {email_str}; address: {address_str}"
+        return (
+            f"name: {name_str}; "
+            f"phones: {phones_str}; "
+            f"birthday: {birthday_str}; "
+            f"email: {email_str}; "
+            f"address: {address_str}"
+        )
+
+    def to_dict(self):
+        """Convert record to dictionary for table display."""
+        return {
+            "name": self.name.value,
+            "phones": ', '.join(p.value for p in self.phones),
+            "birthday": str(self.birthday) if self.birthday else 'N/A',
+            "email": self.email.value if self.email else 'N/A',
+            "address": self.address.value if self.address else 'N/A'
+        }
+
+    def edit_name(self, new_name: str) -> None:
+        """
+        Edits the contact's name.
+
+        Args:
+            new_name (str): The new name for the contact.
+        """
+        self.name = Name(new_name)
 
     def add_email(self, email: str) -> None:
         """
@@ -285,6 +311,18 @@ class AddressBook(UserDict):
         """
         self.data[record.name.value] = record
 
+    def rename_record(self, old_name: str, new_name: str) -> None:
+        """
+        Renames a record in the address book.
+
+        Args:
+            old_name (str): The current name of the record.
+            new_name (str): The new name for the record.
+        """
+        record = self.data.pop(old_name)
+        record.edit_name(new_name)
+        self.data[new_name] = record
+
     def find(self, name: str) -> Record | None:
         """
         Finds and returns a record by name.
@@ -371,7 +409,7 @@ class AddressBook(UserDict):
                 upcoming_birthdays.append({
                     "name": record.name,
                     "birthday": record.birthday,
-                    "congratulation_day": congratulation_day
+                    "congratulation_day": congratulation_day.strftime("%d.%m.%Y")
                 })
 
         return upcoming_birthdays
@@ -399,11 +437,7 @@ class AddressBook(UserDict):
         results.update(self.find_by_address(query))
         return list(results)
 
-    def __str__(self):
-        if not self.data:
-            return "Address book is empty."
 
-        output = []
-        for record in self.data.values():
-            output.append(str(record))
-        return '\n  '.join(output)
+    def to_list_of_dict(self):
+        """Convert all records to list of dictionaries for table display."""
+        return [record.to_dict() for record in self.data.values()]

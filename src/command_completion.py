@@ -14,11 +14,11 @@ try:
     if '-' in delimiters:
         readline.set_completer_delims(delimiters.replace('-', ''))
 
-    COMMANDS = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
+    commands = address_book_commands.keys() | note_book_commands.keys() | common_commands.keys()
 
     def complete(text, state):
         """Return the next possible completion for 'text'."""
-        results = [x for x in COMMANDS if x.startswith(text)] + [None]
+        results = [x for x in commands if x.startswith(text)] + [None]
         return results[state]
 
     readline.set_completer(complete)

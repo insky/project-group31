@@ -2,10 +2,10 @@ import os
 import tempfile
 from datetime import date
 from unittest.mock import patch
+from test.base import TestCaseWithMockDatetime
 
 from src.models.address_book import AddressBook, Record, Phone
 from src.storage import save, load
-from test.base import TestCaseWithMockDatetime
 
 
 class TestAddressBook(TestCaseWithMockDatetime):
@@ -74,7 +74,7 @@ class TestAddressBook(TestCaseWithMockDatetime):
         upcoming = self.book.get_upcoming_birthdays(7)
         congratulation_date = upcoming[0]["congratulation_day"]
         # Should be moved to Monday (Oct 27)
-        self.assertEqual(congratulation_date, date(2025, 10, 27))
+        self.assertEqual(congratulation_date, '27.10.2025')
 
     def test_get_upcoming_birthdays_no_birthdays(self):
         """Test getting upcoming birthdays when none exist."""
@@ -143,3 +143,10 @@ class TestAddressBook(TestCaseWithMockDatetime):
         finally:
             if os.path.exists(temp_filename):
                 os.unlink(temp_filename)
+
+    def test_rename_record(self):
+        """Test renaming a record."""
+        self.book.add_record(self.record1)
+        self.book.rename_record("John", "Johnny")
+        self.assertIn("Johnny", self.book.data)
+        self.assertNotIn("John", self.book.data)

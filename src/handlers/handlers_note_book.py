@@ -1,16 +1,19 @@
 """Handlers for user commands."""
 
 from src.models.note_book import NoteBook, Note
+from src.models.messages import Message, ErrorMessage, SuccessMessage, TableMessage
 from src.utils import input_error
 
 
 @input_error('Note')
-def handle_add_note(notes: NoteBook, *args: str) -> str:
+def handle_add_note(notes: NoteBook, *args: str) -> Message:
     """
     add-note <text> [--tags tag1 [tag2 [...]]]
     """
     if not args:
-        return "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"
+        return ErrorMessage(
+            "Please provide note text. Example: add-note \"Купити молоко\" --tags #home"
+        )
 
     if "--tags" in args:
         tag_index = args.index("--tags")
@@ -23,7 +26,7 @@ def handle_add_note(notes: NoteBook, *args: str) -> str:
 
     text = " ".join(text_parts).strip()
     if not text:
-        return "Note text cannot be empty."
+        return ErrorMessage("Note text cannot be empty.")
 
     tags = set()
     for raw_tag in tag_parts:
@@ -37,7 +40,7 @@ def handle_add_note(notes: NoteBook, *args: str) -> str:
 
     notes.add_note(note)
 
-    return f"Note added: {note}"
+    return SuccessMessage("Note added")
 
 
 @input_error('Note')
@@ -51,11 +54,13 @@ def handle_all_notes(notes: NoteBook):
     Returns:
         str: The list of notes or message if none.
     """
-    return NoteBook.list_to_string(notes.list_notes())
+    if not notes.data:
+        return Message("Note book is empty.")
+    return TableMessage(notes.to_list_of_dict())
 
 
 @input_error('Note')
-def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
+def handle_find_note_by_tag(notes: NoteBook, tag: str) -> Message:
     """
     Finds notes by tag.
 
@@ -68,15 +73,18 @@ def handle_find_note_by_tag(notes: NoteBook, tag: str) -> str:
     """
     normalized = tag.strip().lstrip("#").lower()
     if not normalized:
-        return "Please provide a non-empty tag."
+        return ErrorMessage("Please provide a non-empty tag.")
 
     result = notes.find_by_tag(normalized)
 
-    return NoteBook.list_to_string(result, empty_string=f'No notes found for tag "{normalized}".')
+    if result:
+        return TableMessage([note.to_dict() for note in result])
+
+    return ErrorMessage(f'No notes found for tag "{normalized}".')
 
 
 @input_error('Note')
-def handle_search_note(notes: NoteBook, *args: str) -> str:
+def handle_search_note(notes: NoteBook, *args: str) -> Message:
     """
     Finds notes by text content.
 
@@ -89,15 +97,18 @@ def handle_search_note(notes: NoteBook, *args: str) -> str:
     """
     normalized = " ".join(args).strip().lower()
     if not normalized:
-        return "Please provide non-empty text to search."
+        return ErrorMessage("Please provide non-empty text to search.")
 
     result = notes.search_by_text(normalized)
 
-    return NoteBook.list_to_string(result, empty_string=f'No notes found containing "{normalized}".')
+    if result:
+        return TableMessage([note.to_dict() for note in result])
+
+    return ErrorMessage(f'No notes found containing "{normalized}".')
 
 
 @input_error('Note')
-def handle_update_note(notes: NoteBook, note_id: str, *new_text_parts: str) -> str:
+def handle_update_note(notes: NoteBook, note_id: str, *new_text_parts: str) -> Message:
     """
     Updates note text.
 
@@ -110,18 +121,18 @@ def handle_update_note(notes: NoteBook, note_id: str, *new_text_parts: str) -> s
         str: The result message.
     """
     if not new_text_parts:
-        return "Please provide new note text."
+        return ErrorMessage("Please provide new note text.")
 
     new_text = " ".join(new_text_parts).strip()
     if not new_text:
-        return "New text cannot be empty."
+        return ErrorMessage("New text cannot be empty.")
 
-    note = notes.edit_note_text(int(note_id), new_text)
-    return f"Note {note_id} updated: {note}"
+    notes.edit_note_text(int(note_id), new_text)
+    return SuccessMessage("Note updated")
 
 
 @input_error('Note')
-def handle_delete_note(notes: NoteBook, note_id: str) -> str:
+def handle_delete_note(notes: NoteBook, note_id: str) -> Message:
     """
     Deletes a note by ID.
 
@@ -132,10 +143,10 @@ def handle_delete_note(notes: NoteBook, note_id: str) -> str:
         str: The result message.
     """
     notes.delete_note(int(note_id))
-    return f"Note {note_id} deleted."
+    return SuccessMessage("Note deleted")
 
 @input_error('Note')
-def handle_add_tag(notes: NoteBook, note_id: str, *tags: str) -> str:
+def handle_add_tag(notes: NoteBook, note_id: str, *tags: str) -> Message:
     """
     Adds tags to a note.
 
@@ -145,22 +156,22 @@ def handle_add_tag(notes: NoteBook, note_id: str, *tags: str) -> str:
         tags (str): The tags to add.
     """
     if not tags:
-        return "Please provide at least one tag."
+        return ErrorMessage("Please provide at least one tag.")
 
     cleaned = {t.lstrip('#').lower() for t in tags if t.strip()}
     if not cleaned:
-        return "No valid tags provided."
+        return ErrorMessage("No valid tags provided.")
 
     note = notes.find_by_id(int(note_id))
     if not note:
-        return "Note not found."
+        return ErrorMessage("Note not found.")
 
     note.add_tags(cleaned)
 
-    return f"Tags added to note {note_id}: {note.sorted_tags}"
+    return SuccessMessage("Tags added")
 
 @input_error('Note')
-def handle_delete_tag(notes: NoteBook, note_id: str, tag: str) -> str:
+def handle_delete_tag(notes: NoteBook, note_id: str, tag: str) -> Message:
     """
     Deletes a tag from a note.
 
@@ -170,10 +181,10 @@ def handle_delete_tag(notes: NoteBook, note_id: str, tag: str) -> str:
         tag (str): The tag to delete.
     """
     notes.delete_tag_from_note(int(note_id), tag)
-    return f"Tag '{tag}' removed from note {note_id}."
+    return SuccessMessage("Tag removed")
 
 @input_error('Note')
-def handle_update_tag(notes: NoteBook, note_id: str, old_tag: str, new_tag: str) -> str:
+def handle_update_tag(notes: NoteBook, note_id: str, old_tag: str, new_tag: str) -> Message:
     """
     Updates a tag in a note.
 
@@ -184,7 +195,7 @@ def handle_update_tag(notes: NoteBook, note_id: str, old_tag: str, new_tag: str)
         new_tag (str): The new tag to add.
     """
     notes.update_note_tag(int(note_id), old_tag, new_tag)
-    return f"Tag '{old_tag}' updated to '{new_tag}' in note {note_id}."
+    return SuccessMessage("Tag updated")
 
 
 commands: dict = {

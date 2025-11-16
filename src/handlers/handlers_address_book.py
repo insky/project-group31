@@ -1,6 +1,7 @@
 """Handlers for user commands."""
 
 from src.models.address_book import AddressBook, Record
+from src.models.messages import Message, ErrorMessage, SuccessMessage, TableMessage
 from src.utils import input_error
 
 
@@ -29,11 +30,29 @@ def handle_add_contact(book: AddressBook, name: str, phone: str | None, email: s
         record.add_phone(phone)
     if email:
         record.add_email(email)
-    return message
+    return SuccessMessage(message)
 
 
 @input_error('Contact')
-def handle_change_contact(book: AddressBook, name: str, old_phone: str, new_phone: str):
+def handle_change_contact_name(book: AddressBook, old_name: str, new_name: str):
+    """
+    Changes an existing contact's name.
+
+    Args:
+        book (AddressBook): The address book.
+        old_name (str): The old contact name.
+        new_name (str): The new contact name.
+
+    Returns:
+        str: The result message.
+    """
+    book.rename_record(old_name, new_name)
+
+    return SuccessMessage("Contact updated")
+
+
+@input_error('Contact')
+def handle_change_contact_phone(book: AddressBook, name: str, old_phone: str, new_phone: str):
     """
     Changes an existing contact's phone number.
 
@@ -48,7 +67,7 @@ def handle_change_contact(book: AddressBook, name: str, old_phone: str, new_phon
     """
     record = book.find(name)
     record.edit_phone(old_phone, new_phone)  # type: ignore
-    return "Contact updated"
+    return SuccessMessage("Contact updated")
 
 
 @input_error('Contact')
@@ -64,11 +83,11 @@ def handle_phone(book: AddressBook, name: str):
         str: The phone numbers or error message.
     """
     record = book.find(name)
-    return f"{name}: {', '.join(phone.value for phone in record.phones)}"  # type: ignore
+    return Message(f"{name}: {', '.join(phone.value for phone in record.phones)}")  # type: ignore
 
 
 @input_error('Contact')
-def handle_all(book: AddressBook):
+def handle_all(book: AddressBook) -> Message:
     """
     Lists all contacts.
 
@@ -78,11 +97,14 @@ def handle_all(book: AddressBook):
     Returns:
         str: The list of contacts or message if none.
     """
-    return str(book)
+    if not book.data:
+        return Message("Address book is empty.")
+
+    return TableMessage(book.to_list_of_dict())
 
 
 @input_error('Contact')
-def handle_search(book: AddressBook, query: str) -> str:
+def handle_search(book: AddressBook, query: str) -> Message:
     """
     Searches for contacts matching the query.
 
@@ -95,12 +117,9 @@ def handle_search(book: AddressBook, query: str) -> str:
     """
     records = book.search(query)
 
-    output = []
     if records:
-        for record in records:
-            output.append(str(record))
-        return '\n- '.join(output)
-    return f'No contact found for "{query}"'
+        return TableMessage([record.to_dict() for record in records])
+    return ErrorMessage(f'No contact found for "{query}"')
 
 
 @input_error('Contact')
@@ -118,13 +137,13 @@ def handle_add_birthday(book: AddressBook, name: str, birthday: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        return ErrorMessage("Contact not found")
 
     if record.birthday:
-        return "Birthday already set"
+        return ErrorMessage("Birthday already set")
 
     record.add_birthday(birthday)
-    return "Birthday added"
+    return SuccessMessage("Birthday added")
 
 
 @input_error('Contact')
@@ -141,12 +160,12 @@ def handle_show_birthday(book: AddressBook, name: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        return ErrorMessage("Contact not found")
 
     if record.birthday is None:
-        return "Birthday not set"
+        return ErrorMessage("Birthday not set")
 
-    return f"{name}'s birthday is {record.birthday}."  # type: ignore
+    return Message(f"{name}'s birthday is {record.birthday}.")  # type: ignore
 
 
 @input_error('Contact')
@@ -163,12 +182,9 @@ def handle_upcoming_birthdays(book: AddressBook, days: str = '7'):
     """
     upcoming = book.get_upcoming_birthdays(days_ahead=int(days))
     if not upcoming:
-        return "No upcoming birthdays"
+        return ErrorMessage("No upcoming birthdays")
 
-    result = []
-    for item in upcoming:
-        result.append(f"name: {item['name']}; birthday: {item['birthday']}; congratulation day: {item['congratulation_day'].strftime('%d.%m.%Y')}")
-    return "\n".join(result)
+    return TableMessage(upcoming)
 
 
 @input_error('Contact')
@@ -265,10 +281,10 @@ def handle_add_phone(book: AddressBook, name: str, phone: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        return ErrorMessage("Contact not found")
 
     record.add_phone(phone)
-    return "Phone added"
+    return SuccessMessage("Phone added")
 
 
 @input_error('Contact')
@@ -286,18 +302,19 @@ def handle_remove_phone(book: AddressBook, name: str, phone: str):
     """
     record = book.find(name)
     if record is None:
-        return "Contact not found"
+        return ErrorMessage("Contact not found")
 
     try:
         record.remove_phone(phone)
-        return "Phone removed"
+        return SuccessMessage("Phone removed")
     except KeyError:
-        return "Phone number not found"
+        return ErrorMessage("Phone number not found")
 
 
 commands: dict = {
     'add-contact': handle_add_contact,
-    'change-contact': handle_change_contact,
+    'change-name': handle_change_contact_name,
+    'change-phone': handle_change_contact_phone,
     'show-phone': handle_phone,
     'add-phone': handle_add_phone,
     'remove-phone': handle_remove_phone,
