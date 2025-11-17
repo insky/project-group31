@@ -203,8 +203,8 @@ def handle_update_birthday(book: AddressBook, name: str, birthday: str):
     record = book.find(name)
     if record:
         record.add_birthday(birthday)
-        return 'Birthday updated'
-    return 'Contact not found'
+        return SuccessMessage('Birthday updated')
+    return ErrorMessage('Contact not found')
 
 
 @input_error('Contact')
@@ -223,8 +223,8 @@ def handle_update_email(book: AddressBook, name: str, email: str):
     record = book.find(name)
     if record:
         record.add_email(email)
-        return 'Email updated'
-    return 'Contact not found'
+        return SuccessMessage('Email updated')
+    return ErrorMessage('Contact not found')
 
 
 @input_error('Contact')
@@ -243,8 +243,8 @@ def handle_update_address(book: AddressBook, name: str, address: str):
     record = book.find(name)
     if record:
         record.add_address(address)
-        return 'Address updated'
-    return 'Contact not found'
+        return SuccessMessage('Address updated')
+    return ErrorMessage('Contact not found')
 
 
 @input_error('Contact')
@@ -262,8 +262,8 @@ def handle_delete(book: AddressBook, name: str):
     record = book.find(name)
     if record:
         book.delete(name)
-        return 'Contact deleted'
-    return 'Contact not found'
+        return SuccessMessage('Contact deleted')
+    return ErrorMessage('Contact not found')
 
 
 @input_error('Contact')

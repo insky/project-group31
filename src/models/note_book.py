@@ -148,7 +148,7 @@ class NoteBook(UserDict[int, Note]):
 
     def __str__(self):
         if not self.data:
-            return "Note book is empty."
+            raise NoteError("Note does not exist")
 
         output = []
         for record in self.data.values():
